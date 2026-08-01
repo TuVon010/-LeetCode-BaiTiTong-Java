@@ -5,7 +5,7 @@
 **Obsidian + Claudian · Java · 14 天速通**
 
 [![Obsidian](https://img.shields.io/badge/Obsidian-知识库-7C3AED?logo=obsidian)](https://obsidian.md/)
-[![Claudian](https://img.shields.io/badge/Claudian-AI插件-D4A574)](https://github.com/ClaudianObsidian/claudian)
+[![Claudian](https://img.shields.io/badge/Claudian-AI插件-D4A574)](https://github.com/yishentu/claudian)
 [![Java](https://img.shields.io/badge/Java-刷题语言-ED8B00?logo=openjdk)](https://www.java.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -145,7 +145,7 @@ LeetCode-BaiTiTong/
 ### 环境要求
 
 - [Obsidian](https://obsidian.md/)（推荐最新版）
-- [Claudian](https://github.com/ClaudianObsidian/claudian) — Obsidian AI 插件（需配置 Claude API Key）
+- [Claudian](https://github.com/yishentu/claudian) — Obsidian AI 插件（需配置 Claude API Key，也可直接在 Obsidian 社区插件市场中搜索 "Claudian" 安装）
 
 ### 使用步骤
 
