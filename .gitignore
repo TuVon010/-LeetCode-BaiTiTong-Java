@@ -1,0 +1,17 @@
+# Obsidian 个人配置（不共享）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# TRAE 工作目录（临时产物）
+.trae-cn/
