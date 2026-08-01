@@ -1,26 +1,27 @@
 <div align="center">
 
-# 力扣百题通 (LeetCode-BaiTiTong)
+# 力扣百题通 · Java 版 (LeetCode-BaiTiTong-Java)
 
 **Obsidian + Claudian · Java · 14 天速通**
 
-[![GitHub](https://img.shields.io/badge/GitHub-开源仓库-181717?logo=github)](https://github.com/mo-lx/LeetCode-BaiTiTong)
 [![Obsidian](https://img.shields.io/badge/Obsidian-知识库-7C3AED?logo=obsidian)](https://obsidian.md/)
 [![Claudian](https://img.shields.io/badge/Claudian-AI插件-D4A574)](https://github.com/ClaudianObsidian/claudian)
 [![Java](https://img.shields.io/badge/Java-刷题语言-ED8B00?logo=openjdk)](https://www.java.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**力扣百题通** — 一套面向 **Obsidian + Claudian** 打造的 LeetCode Hot 100 个人知识库与 14 天速成刷题路线。通过 Claudian 插件将 Claude 深度集成到 Obsidian 中，实现 AI 驱动的自适应学习闭环。
+**力扣百题通 · Java 版** — 一套面向 **Obsidian + Claudian** 打造的 LeetCode Hot 100 个人知识库与 14 天速成刷题路线。通过 Claudian 插件将 Claude 深度集成到 Obsidian 中，实现 AI 驱动的自适应学习闭环。
 
 融合 **labuladong 框架思维** + **代码随想录系统专题法** + **灵茶山艾府题单驱动法** 三大体系，配合 AI 自适应教学系统，帮你高效拿下算法面试。
 
 </div>
 
+> 📌 **项目来源：** 本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong) 的 Java 适配版本。原项目由 [mo-lx](https://github.com/mo-lx) 精心打造，以 Python 为刷题语言，内容详实、体系完善。本仓库在其基础上将全部代码与文档适配为 Java，所有创意、方法论体系和知识框架均归功于原作者。如果你更习惯 Python，请移步[原项目](https://github.com/mo-lx/LeetCode-BaiTiTong)；如果你偏好 Java，这里就是你的起点。
+
 ---
 
 ## 项目简介
 
-本项目是一个完整的 **LeetCode Hot 100 算法学习体系**（力扣百题通），以 Obsidian 知识库为载体，专为有 Java 基础的学习者设计。
+本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong)（Python 版）的 Java 语言分支，以 Obsidian 知识库为载体，专为有 Java 基础的学习者设计。与原版相比，仅将刷题语言从 Python 替换为 Java，其余知识体系、学习路线和文档结构完全保持一致。
 
 核心特色：
 
@@ -207,11 +208,17 @@ LeetCode-BaiTiTong/
 
 ## 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提交 Issue 和 Pull Request！Java 代码相关的问题和优化请提交到本仓库；通用内容（题目分析、方法论等）建议优先贡献到[原项目](https://github.com/mo-lx/LeetCode-BaiTiTong)。
 
-- 发现题目详解有误？欢迎提交 PR 修正
-- 有更好的解题思路？欢迎补充
-- 想增加新的专题总结？欢迎贡献
+- 发现 Java 代码有误？欢迎提交 PR 修正
+- 有更好的 Java 实现方式？欢迎补充
+- 想增加新的专题总结？建议先提交到原项目，再同步到本仓库
+
+---
+
+## 致谢
+
+感谢 [mo-lx](https://github.com/mo-lx) 创作并开源了 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong) 这一优秀的算法学习体系。本仓库仅做了语言层面的翻译适配，所有知识内容、学习路线和 AI 教学系统的设计均出自原作者之手。站在前人的肩膀上，才让 Java 学习者也能享受到这套完整的算法学习体验。
 
 ---
 
