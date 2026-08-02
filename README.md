@@ -195,11 +195,67 @@ LeetCode-BaiTiTong/
 - **提交信息规范** — `docs:` / `feat:` / `fix:` / `chore:` / `test:` 前缀 + 简洁中文描述
 - **隐私安全** — `.obsidian/`（工作区配置）和 `.claudian/`（AI 会话记录）已加入 `.gitignore`，不会上传
 
-使用方式：
+#### 如何绑定你自己的远程仓库
+
+克隆本项目后，默认的 `origin` 指向本项目仓库。想同步到**你自己的**托管仓库，按以下步骤操作：
+
+**① 查看当前远程仓库地址**
 ```bash
-git remote set-url origin <你的仓库地址>   # 绑定你的远程仓库
-# 之后只需正常学习，AI 会在每次修改后自动帮你同步
+git remote -v
+# 输出示例：
+# origin  git@github.com:xxx/LeetCode-BaiTiTong-Java.git (fetch)
+# origin  git@github.com:xxx/LeetCode-BaiTiTong-Java.git (push)
 ```
+
+**② 先在 GitHub 上创建你的空仓库**
+- 打开 GitHub → New repository → 取个名字（如 `My-LeetCode-Notes`）
+- **不要**勾选 "Add a README"（避免产生冲突的初始提交）
+- 创建完成后，复制仓库地址（HTTPS 或 SSH 均可）
+
+**③ 修改 `origin` 指向你的仓库（二选一）**
+
+方式一（推荐，一行搞定）：
+```bash
+git remote set-url origin <你的仓库地址>
+# 例：git remote set-url origin git@github.com:你的用户名/My-LeetCode-Notes.git
+```
+
+方式二（删除旧的 + 添加新的）：
+```bash
+git remote remove origin
+git remote add origin <你的仓库地址>
+```
+
+**④ 首次推送到你的仓库**
+```bash
+git push -u origin main
+# -u 表示记住关联，之后只需 git push 即可
+```
+
+**⑤ 验证**
+```bash
+git remote -v     # 确认地址已变成你的仓库
+git status        # 确认工作区干净
+```
+
+**认证方式说明（三选一）：**
+
+| 方式 | 命令 | 适用场景 |
+|------|------|---------|
+| HTTPS | `https://github.com/用户名/仓库名.git` | 首次使用，需输入用户名 + Token |
+| SSH | `git@github.com:用户名/仓库名.git` | 已配置 SSH Key（推荐，免密推送） |
+| GitHub CLI | `gh repo create` 后自动配置 | 已安装 `gh` 并登录 |
+
+**常见问题（FAQ）：**
+
+| 问题 | 解决 |
+|------|------|
+| 提示 `Permission denied (publickey)` | 未配置 SSH Key，改用 HTTPS 方式，或执行 `ssh-keygen` 生成并添加到 GitHub |
+| 提示 `Authentication failed` | HTTPS 方式下 GitHub 已不支持密码，需用 **Personal Access Token** 代替密码 |
+| 推送到旧仓库不想覆盖 | 不要用 `set-url` 替换，而是保留原 `origin`，新增一个远程：`git remote add myrepo <地址>`，推送时用 `git push myrepo main` |
+| 想保留上游更新 | 添加两个 remote：`upstream` 指向本项目、`origin` 指向你的仓库，需要时 `git pull upstream main` 同步 |
+
+**配置完成后**：只需正常学习，AI 会在每次修改后自动帮你同步到自己的仓库。
 
 ## 知识图谱预览
 
