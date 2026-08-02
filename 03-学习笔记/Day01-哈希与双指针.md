@@ -150,18 +150,55 @@ for (int fast = 0; fast < nums.length; fast++) {
 - **感悟/易错点：** 移动矮墙是灵魂（移动高的只会让面积减小）；宽 = 下标差 `right-left`；相等时移哪边都行；数据大时可考虑 long 防溢出
 
 ### 6. 三数之和（Medium）
-- **核心思路：**
+- **核心思路：** 排序 + 固定一个 + 双指针找两数之和 = `-nums[i]`；用 Set 自动去重
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  Arrays.sort(nums);
+  Set<List<Integer>> set = new HashSet<>();
+  for (int i = 0; i < nums.length - 2; i++) {
+      int left = i + 1, right = nums.length - 1;
+      int need = -nums[i];
+      while (left < right) {
+          int twoSum = nums[left] + nums[right];
+          if (need > twoSum) {
+              left++;
+          } else if (need < twoSum) {
+              right--;
+          } else {
+              set.add(Arrays.asList(nums[i], nums[left], nums[right]));
+              left++;     // ★ 加完必须移动指针，否则死循环
+              right--;
+          }
+      }
+  }
+  return new ArrayList<>(set);
+  ```
+- **复杂度：** O(n²) / O(n²)（Set 去重版空间）
+- **掌握程度：** ✅
+- **感悟/易错点：** 两处 bug——`int[]` 不能放进 `List<Integer>` 要用 `Arrays.asList`；找到解后必须移动指针否则死循环。Set 去重法比手动 3 处去重更简单
 
 ### 7. 接雨水（Hard）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+- **核心思路：** 每个位置水量 = `min(左最高, 右最高) - 当前高度`；对撞指针边走边维护左右最大值，谁矮先算谁
+- **代码实现（对撞指针）：**
+  ```java
+  int left = 0, right = height.length - 1;
+  int leftMax = 0, rightMax = 0, sum = 0;
+  while (left < right) {
+      leftMax = Math.max(leftMax, height[left]);
+      rightMax = Math.max(rightMax, height[right]);
+      if (leftMax < rightMax) {
+          sum += leftMax - height[left];
+          left++;
+      } else {
+          sum += rightMax - height[right];
+          right--;
+      }
+  }
+  return sum;
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（暴力版 ✅ + 对撞版 ✅）
+- **感悟/易错点：** 先写了暴力版（每个位置左右各扫一遍 O(n²)）——思路对但可能超时；对撞版每轮锁定一格（拉链原理）。核心困惑见 [[02-Wiki/题目详解/42-接雨水]] 的"学员困惑解答"
 
 ---
 
