@@ -130,11 +130,24 @@ for (int fast = 0; fast < nums.length; fast++) {
 - **感悟/易错点：** 我写了两版——覆盖+补零版、交换版，都是快慢指针；交换版更简洁；`index`/`slow` 就是慢指针，`i`/`fast` 就是快指针
 
 ### 5. 盛最多水的容器（Medium）
-- **核心思路：**
+- **核心思路：** 对撞指针——两侧向中间靠拢，面积 = 宽 × 矮墙高度；**每次移动较矮的那侧**（木桶效应）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  int left = 0, right = height.length - 1, res = 0;
+  while (left < right) {
+      int h = Math.min(height[left], height[right]);
+      res = Math.max(res, h * (right - left));
+      if (height[left] < height[right]) {
+          left++;
+      } else {
+          right--;
+      }
+  }
+  return res;
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅
+- **感悟/易错点：** 移动矮墙是灵魂（移动高的只会让面积减小）；宽 = 下标差 `right-left`；相等时移哪边都行；数据大时可考虑 long 防溢出
 
 ### 6. 三数之和（Medium）
 - **核心思路：**

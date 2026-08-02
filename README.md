@@ -15,13 +15,13 @@
 
 </div>
 
-> 📌 **项目来源：** 本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong) 的 Java 适配版本。原项目由 [mo-lx](https://github.com/mo-lx) 精心打造，以 Python 为刷题语言，内容详实、体系完善。本仓库在其基础上将全部代码与文档适配为 Java，所有创意、方法论体系和知识框架均归功于原作者。如果你更习惯 Python，请移步[原项目](https://github.com/mo-lx/LeetCode-BaiTiTong)；如果你偏好 Java，这里就是你的起点。
+> 📌 **项目来源：** 本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong) 的 Java 适配版本。原项目由 [mo-lx](https://github.com/mo-lx) 精心打造，以 Python 为刷题语言，内容详实、体系完善。本仓库在其基础上将全部代码与文档适配为 Java，如果你更习惯 Python，请移步[原项目](https://github.com/mo-lx/LeetCode-BaiTiTong)；如果你偏好 Java，这里就是你的起点。
 
 ---
 
 ## 项目简介
 
-本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong)（Python 版）的 Java 语言分支，以 Obsidian 知识库为载体，专为有 Java 基础的学习者设计。与原版相比，仅将刷题语言从 Python 替换为 Java，其余知识体系、学习路线和文档结构完全保持一致。
+本项目是 [LeetCode-BaiTiTong](https://github.com/mo-lx/LeetCode-BaiTiTong)（Python 版）的 Java 语言分支，以 Obsidian 知识库为载体，专为有 Java 基础的学习者设计。与原版相比，将刷题语言从 Python 替换为 Java，并添加了纠错记录文档。
 
 核心特色：
 
@@ -158,7 +158,7 @@ LeetCode-BaiTiTong/
 ### 环境要求
 
 - [Obsidian](https://obsidian.md/)（推荐最新版）
-- [Claudian](https://github.com/yishentu/claudian) — Obsidian AI 插件（需配置 Claude API Key，也可直接在 Obsidian 社区插件市场中搜索 "Claudian" 安装）
+- [Claudian](https://github.com/yishentu/claudian) — Obsidian AI 插件（需配置 Claude API Key（电脑上有配置可以不用管（比如说cc switch配置过可以直接拿来用），也可直接在 Obsidian 社区插件市场中搜索 "Claudian" 安装）
 
 ### 使用步骤
 
