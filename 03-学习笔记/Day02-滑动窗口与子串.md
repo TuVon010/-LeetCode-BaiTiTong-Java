@@ -1,6 +1,6 @@
 # Day 2 · 滑动窗口与子串
 
-> **日期：** 2026-__-__
+> **日期：** 2026-08-02
 > **学习目标：** 滑动窗口三问法与子串处理技巧
 > **相关知识页：** [[02-Wiki/专题总结/02-双指针与滑动窗口]] · [[02-Wiki/专题总结/03-数组与矩阵]]
 
@@ -40,11 +40,30 @@ Deque<Integer> q = new ArrayDeque<>();
 ## 二、做题记录
 
 ### 1. 无重复字符的最长子串（Medium）
-- **核心思路：**
+- **核心思路：** 不定长滑动窗口 + HashSet。右指针扩展窗口，遇到重复字符时左指针收缩到无重复，每次扩展后更新最大长度
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  import java.util.*;
+  class Solution {
+      public int lengthOfLongestSubstring(String s) {
+          Set<Character> set = new HashSet<>();
+          int maxlen = 0, left = 0;
+          for (int right = 0; right < s.length(); right++) {
+              char ch = s.charAt(right);
+              while (set.contains(ch)) {
+                  set.remove(s.charAt(left));
+                  left++;
+              }
+              set.add(ch);
+              maxlen = Math.max(maxlen, right - left + 1);
+          }
+          return maxlen;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(k)（k=字符集大小）
+- **掌握程度：** ✅
+- **感悟/易错点：** 踩了 4 个坑——循环条件写反、只在重复时更新答案（无重复会得 0）、用 if 而不是 while 收不干净、长度公式忘 +1 且 remove 顺序反了。滑动窗口核心：**每次扩展后更新答案 + while 收缩**
 
 ### 2. 找到字符串中所有字母异位词（Medium）
 - **核心思路：**
