@@ -99,18 +99,56 @@ Deque<Integer> q = new ArrayDeque<>();
 - **感悟/易错点：** 异位词 ⟺ 计数数组相等（关键洞察）；滑出减、滑入加；`charAt` 拼写、`length()` 带括号、`false` 小写、数组参数带 `[]`（见 ERR-007）
 
 ### 3. 和为 K 的子数组（Medium）
-- **核心思路：**
+- **核心思路：** 前缀和 + 哈希表。子数组和=k ⟺ 存在历史前缀和 = 当前前缀和 - k。不能用滑动窗口（有负数）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  import java.util.*;
+  class Solution {
+      public int subarraySum(int[] nums, int k) {
+          Map<Integer, Integer> map = new HashMap<>();
+          map.put(0, 1);          // 空数组前缀和
+          int s = 0, ans = 0;
+          for (int x : nums) {
+              s += x;                                   // ① 先更新前缀和
+              ans += map.getOrDefault(s - k, 0);        // ② 先查历史匹配
+              map.put(s, map.getOrDefault(s, 0) + 1);   // ③ 后记录当前
+          }
+          return ans;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(n)
+- **掌握程度：** ✅
+- **感悟/易错点：** 我的写法（每轮开头记上一轮 s）与标准写法（初始 put(0,1)+轮尾记录）**等价且都正确**；核心是"查的时刻 map 里不含当前 s"。`map.put(0,1)` 不能省；用 getOrDefault
 
 ### 4. 滑动窗口最大值（Hard）
-- **核心思路：**
+- **核心思路：** 单调递减队列（Deque）。新元素进来时用 while 弹出队尾所有比它小的（它们当不了最大）；队首过期就移除；队首就是当前窗口最大值
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  import java.util.*;
+  class Solution {
+      public int[] maxSlidingWindow(int[] nums, int k) {
+          if (nums.length == 0 || k == 0) return new int[0];
+          Deque<Integer> q = new ArrayDeque<>();   // 存值（也可存索引）
+          int[] res = new int[nums.length - k + 1];
+          for (int i = 0; i < k; i++) {
+              while (!q.isEmpty() && q.peekLast() < nums[i]) q.removeLast();
+              q.addLast(nums[i]);
+          }
+          res[0] = q.peekFirst();
+          for (int i = k; i < nums.length; i++) {
+              if (q.peekFirst() == nums[i - k]) q.removeFirst();   // 过期
+              while (!q.isEmpty() && q.peekLast() < nums[i]) q.removeLast();
+              q.addLast(nums[i]);
+              res[i - k + 1] = q.peekFirst();
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(k)
+- **掌握程度：** ✅
+- **感悟/易错点：** 我用了"值版"（队列存值，用 == 判过期），也可用"索引版"；**弹小必须用 while 不是 if**（ERR-008）；Deque 四个方向：队尾淘汰(pollLast)+入队(addLast)、队首过期(pollFirst)+取值(peekFirst)；单调队列=餐厅等位名单
 
 ### 5. 最小覆盖子串（Hard）
 - **核心思路：**
