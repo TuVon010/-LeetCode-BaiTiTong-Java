@@ -66,11 +66,37 @@ Deque<Integer> q = new ArrayDeque<>();
 - **感悟/易错点：** 踩了 4 个坑——循环条件写反、只在重复时更新答案（无重复会得 0）、用 if 而不是 while 收不干净、长度公式忘 +1 且 remove 顺序反了。滑动窗口核心：**每次扩展后更新答案 + while 收缩**
 
 ### 2. 找到字符串中所有字母异位词（Medium）
-- **核心思路：**
+- **核心思路：** 定长滑动窗口 + 计数数组。窗口大小 = len(p)，每次滑出左边(-1)、滑入右边(+1)，比较窗口计数与 p 计数是否相等（Arrays.equals）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  import java.util.*;
+  class Solution {
+      public boolean areEqual(int[] cntP, int[] window) {
+          for (int i = 0; i < cntP.length; i++)
+              if (cntP[i] != window[i]) return false;
+          return true;
+      }
+      public List<Integer> findAnagrams(String s, String p) {
+          if (p.length() > s.length()) return new ArrayList<>();
+          int[] cntP = new int[26], window = new int[26];
+          List<Integer> res = new ArrayList<>();
+          for (int i = 0; i < p.length(); i++) {
+              cntP[p.charAt(i) - 'a']++;
+              window[s.charAt(i) - 'a']++;
+          }
+          if (areEqual(cntP, window)) res.add(0);
+          for (int left = 0; left < s.length() - p.length(); left++) {
+              window[s.charAt(left) - 'a']--;                // 左边滑出
+              window[s.charAt(left + p.length()) - 'a']++;   // 右边滑入
+              if (areEqual(cntP, window)) res.add(left + 1);
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)（固定 26 数组）
+- **掌握程度：** ✅
+- **感悟/易错点：** 异位词 ⟺ 计数数组相等（关键洞察）；滑出减、滑入加；`charAt` 拼写、`length()` 带括号、`false` 小写、数组参数带 `[]`（见 ERR-007）
 
 ### 3. 和为 K 的子数组（Medium）
 - **核心思路：**
