@@ -158,11 +158,24 @@ Deque<Integer> q = new ArrayDeque<>();
 - **感悟/易错点：**
 
 ### 6. 最大子数组和（Medium）
-- **核心思路：**
+- **核心思路：** Kadane 算法。`sum`（以 i 结尾的局部最优）= max(接上前面, 从自己重开)；`max`（全局最优）记录历史最好成绩。两道 max 分工：局部 vs 全局
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public int maxSubArray(int[] nums) {
+          int max = nums[0];
+          int sum = 0;
+          for (int i = 0; i < nums.length; i++) {
+              sum = Math.max(sum + nums[i], nums[i]);   // 局部：接上 or 重开
+              max = Math.max(max, sum);                  // 全局：记录最好成绩
+          }
+          return max;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** 🔄（需复习）
+- **感悟/易错点：** 第一次接触 Kadane，似懂非懂。核心困惑："为什么两道 max"——sum 管"现在这段怎么走"，max 管"历史最好成绩"。sum 只涨跌当前，max 只涨不跌。必须初始化为 nums[0]（全负数时不能是 0）
 
 ### 7. 合并区间（Medium）
 - **核心思路：**
@@ -170,6 +183,28 @@ Deque<Integer> q = new ArrayDeque<>();
 - **复杂度：** O(__) / O(__)
 - **掌握程度：** ✅ 🔄 ❌
 - **感悟/易错点：**
+
+### 附加巩固：买卖股票的最佳时机（121 · 非 Day2 计划内）
+- **核心思路：** ⭐ 我自己想到的转化思路——算盈利数组（相邻差价），再套 Kadane 求最大连续子数组和。把"买卖股票"转化为"最大子数组和"！
+- **代码实现：**
+  ```java
+  class Solution {
+      public int maxProfit(int[] prices) {
+          if (prices.length == 1) return 0;
+          int[] profit = new int[prices.length - 1];
+          int max = 0, sum = 0;
+          for (int i = 0; i < profit.length; i++) {
+              profit[i] = prices[i + 1] - prices[i];
+              sum = Math.max(sum + profit[i], profit[i]);
+              max = Math.max(max, sum);
+          }
+          return max;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(n)（可优化为 O(1)，不建数组）
+- **掌握程度：** ✅
+- **感悟/易错点：** 转化思路（盈利数组+Kadane）是我自己想到的；另一种解法是维护 minPrice 直接求差。max 初始化为 0（不交易=0 利润）。"举一反三"的里程碑！
 
 ---
 
