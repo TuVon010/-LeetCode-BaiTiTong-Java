@@ -151,11 +151,37 @@ Deque<Integer> q = new ArrayDeque<>();
 - **感悟/易错点：** 我用了"值版"（队列存值，用 == 判过期），也可用"索引版"；**弹小必须用 while 不是 if**（ERR-008）；Deque 四个方向：队尾淘汰(pollLast)+入队(addLast)、队首过期(pollFirst)+取值(peekFirst)；单调队列=餐厅等位名单
 
 ### 5. 最小覆盖子串（Hard）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+- **核心思路：** 滑动窗口集大成。扩大窗口直到覆盖 t，再缩小窗口找最短。两种实现：① 数组 + isCovered 全扫（我的）；② HashMap + valid 计数器（最优）
+- **代码实现（数组版，我 AC 的）：**
+  ```java
+  class Solution {
+      public String minWindow(String S, String t) {
+          int[] cntS = new int[128], cntT = new int[128];
+          if (S.length() < t.length()) return "";
+          for (int i = 0; i < t.length(); i++) cntT[t.charAt(i)]++;
+          int left = 0, ansleft = -1, ansright = S.length();
+          for (int right = 0; right < S.length(); right++) {
+              cntS[S.charAt(right)]++;
+              while (isCovered(cntS, cntT)) {
+                  if (right - left < ansright - ansleft) {
+                      ansright = right; ansleft = left;
+                  }
+                  cntS[S.charAt(left++)]--;   // 注意：用字符下标，不是 left！
+              }
+          }
+          if (ansleft == -1) return "";
+          return S.substring(ansleft, ansright + 1);   // +1！substring 不含右边界
+      }
+      private boolean isCovered(int[] cntS, int[] cntT) {
+          for (int i = 0; i < 128; i++)
+              if (cntS[i] < cntT[i]) return false;   // 涵盖 = >=，不是 ==
+          return true;
+      }
+  }
+  ```
+- **复杂度：** O(n × 128)（数组全扫）/ O(1) 空间
+- **掌握程度：** ✅
+- **感悟/易错点：** 踩了 5 个坑：charAt 拼写（ERR-007 复发）、cntS[left++]-- 下标错（ERR-009）、isCovered 用 !=（ERR-010）、无解判断用长度、substring 少 +1。也理解了 valid 计数器优化版（O(1) 判断覆盖）
 
 ### 6. 最大子数组和（Medium）
 - **核心思路：** Kadane 算法。`sum`（以 i 结尾的局部最优）= max(接上前面, 从自己重开)；`max`（全局最优）记录历史最好成绩。两道 max 分工：局部 vs 全局
