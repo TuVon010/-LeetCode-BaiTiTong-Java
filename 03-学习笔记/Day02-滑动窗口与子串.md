@@ -178,11 +178,70 @@ Deque<Integer> q = new ArrayDeque<>();
 - **感悟/易错点：** 第一次接触 Kadane，似懂非懂。核心困惑："为什么两道 max"——sum 管"现在这段怎么走"，max 管"历史最好成绩"。sum 只涨跌当前，max 只涨不跌。必须初始化为 nums[0]（全负数时不能是 0）
 
 ### 7. 合并区间（Medium）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+- **核心思路：** 排序 + 一次扫描。按起点排序后重叠区间必然相邻，遍历时维护"当前合并区间"：重叠就延长终点，不重叠就保存开新的
+- **代码实现（带详细注释）：**
+  ```java
+  import java.util.*;
+
+  class Solution {
+      public int[][] merge(int[][] intervals) {
+          // ========== 知识点①：Lambda 表达式排序 ==========
+          // 二维数组默认不知道按什么排，需要告诉它规则
+          // (a, b) -> 是"匿名函数"：a 和 b 是相邻两个区间
+          // Integer.compare(a[0], b[0]) 比较两个区间的起点
+          //   返回负数 → a 排前（起点小）；正数 → b 排前；0 → 相等
+          // 效果：按起点从小到大升序排列
+          Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+          // ========== 知识点②：为什么用 List<int[]> ==========
+          // 一个区间 = [start, end] 两个数，正好用一个 int[] 装
+          // List<int[]> = 每个元素是一个区间数组
+          // List<Integer> 只能装一个数，装不下"区间"概念
+          List<int[]> merge = new ArrayList<>();
+
+          // ========== 知识点③：遍历二维数组 ==========
+          // intervals 是 int[][], for-each 遍历出的每个元素是 int[]
+          // interval[0] = 起点, interval[1] = 终点
+          for (int[] interval : intervals) {
+
+              // ========== 知识点④：判断重叠 ==========
+              // merge.isEmpty() 空列表，直接加第一个区间
+              // interval[0] > merge.get(merge.size()-1)[1]
+              //   merge.get(merge.size()-1) = 取列表最后一个区间
+              //   .size() 是 List 的长度方法（数组用 .length 无括号，String 用 .length()）
+              //   [1] 是那个区间的终点
+              // 条件翻译：当前区间起点 > 最后一个区间终点 → 不重叠
+              // 注意用 > 不是 >= ：端点相接（==）算重叠，要合并
+              if (merge.isEmpty() || interval[0] > merge.get(merge.size() - 1)[1]) {
+                  // 不重叠：新建一个区间副本加入
+                  // new int[]{interval[0], interval[1]} 新建副本，不存原数组引用（避免污染输入）
+                  merge.add(new int[]{interval[0], interval[1]});
+              } else {
+                  // ========== 知识点⑤：引用类型（最重要） ==========
+                  // int[] last = merge.get(...) 不是拷贝！
+                  // 它只是"指向" merge 里那个数组对象的引用（相当于给钥匙）
+                  // 所以改 last[1]，merge 里的那个数组也会变 —— 这正是我们想要的合并效果
+                  int[] last = merge.get(merge.size() - 1);
+                  // 合并：终点取较大值（可能新区间被完全包含在内）
+                  last[1] = Math.max(last[1], interval[1]);
+              }
+          }
+
+          // ========== 知识点⑥：toArray 转换 ==========
+          // merge 是 List，题目要 int[][]
+          // list.toArray(参数) 需要传一个数组来确定返回类型
+          // new int[merge.size()][]  = "买一个 size 层的空书架"
+          //    只写外层长度 size()，不写内层长度
+          //    因为 List 里的 int[] 元素已经现成了，toArray 会自己放进去
+          //    （内层长度是创建完整二维数组时才写，如 new int[3][2]）
+          // 也可以写 new int[0][] —— toArray 发现不够大会自动扩容
+          return merge.toArray(new int[merge.size()][]);
+      }
+  }
+  ```
+- **复杂度：** O(n log n)（排序）/ O(n)（结果数组）
+- **掌握程度：** ✅
+- **感悟/易错点：** 5 个知识点：Lambda 排序、List<int[]>、重叠判断(>)、引用共享(改last改merge)、toArray(只给外层长度)。核心洞察：排序后重叠区间必然相邻，O(n²)→O(n log n)
 
 ### 附加巩固：买卖股票的最佳时机（121 · 非 Day2 计划内）
 - **核心思路：** ⭐ 我自己想到的转化思路——算盈利数组（相邻差价），再套 Kadane 求最大连续子数组和。把"买卖股票"转化为"最大子数组和"！
