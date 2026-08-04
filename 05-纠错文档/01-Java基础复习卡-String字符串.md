@@ -97,6 +97,25 @@ arr[0] = 'H';                      // 修改 → {'H','e','l','l','o'}
 | `substring` 边界搞错 | `[a, b)` 含头不含尾 | 左闭右开区间 |
 | 用 `length()` 时忘了括号 | `s.length()` | String 的方法是 `length()`（数组是 `.length` 没括号） |
 
+### 2.5 `charAt` vs `toCharArray` 对比（高频混淆 ⭐）
+
+| | `charAt(i)` | `toCharArray()` |
+|---|---|---|
+| 意思 | 取**第 i 个**字符 | 变成**整个**字符数组 |
+| 返回 | `char`（单个）| `char[]`（数组）|
+| 参数 | 有（下标 i）| 无 |
+| 例子 | `"abc".charAt(1)` → `'b'` | `"abc".toCharArray()` → `{'a','b','c'}` |
+| 记忆点 | char **At** = 字符**在位置** | to **CharArray** = 转成**字符数组** |
+
+> 🧠 **一句话：** `At` = 单点定位（带下标），`Array` = 整体打包（无下标）。
+> - 想"取"某个位置 → `charAt(i)`
+> - 想"变"成数组 → `toCharArray()`
+> - 等价关系：`"hello".charAt(1)` ≡ `"hello".toCharArray()[1]`
+
+**使用场景：**
+- 滑动窗口按位置取字符 → `charAt(i)`
+- 排序/修改/统计全部字符（如异位词）→ `toCharArray()`
+
 ---
 
 ## 三、StringBuilder（频繁拼接用）
