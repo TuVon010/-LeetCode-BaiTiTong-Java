@@ -1,6 +1,6 @@
 # Day 3 · 数组与矩阵
 
-> **日期：** 2026-__-__
+> **日期：** 2026-08-03
 > **学习目标：** 数组原地操作技巧与矩阵遍历/变换
 > **相关知识页：** [[02-Wiki/专题总结/03-数组与矩阵]] · [[02-Wiki/专题总结/01-哈希表]]
 
@@ -49,11 +49,30 @@ int row = 0, col = n - 1;
 ## 二、做题记录
 
 ### 1. 轮转数组（Medium）
-- **核心思路：**
+- **核心思路：** 三次翻转法。整体翻转→前k个翻转→后n-k个翻转，实现向右轮转 k 位。先 `k %= n` 处理 k>n
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public void rotate(int[] nums, int k) {
+          k %= nums.length;              // 关键：取模防越界
+          reverse(nums, 0, nums.length - 1);  // 1. 整体翻转
+          reverse(nums, 0, k - 1);            // 2. 前 k 个
+          reverse(nums, k, nums.length - 1);  // 3. 后 n-k 个
+      }
+      private void reverse(int[] nums, int start, int end) {
+          while (start < end) {
+              int temp = nums[start];
+              nums[start] = nums[end];
+              nums[end] = temp;
+              start++;
+              end--;
+          }
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅
+- **感悟/易错点：** 漏了 `k %= n` 导致越界（ERR-011）；三次翻转顺序不能变；reverse 双指针用 start<end
 
 ### 2. 除自身以外数组的乘积（Medium）
 - **核心思路：**
