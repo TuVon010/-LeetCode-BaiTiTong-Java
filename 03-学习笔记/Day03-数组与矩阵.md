@@ -100,10 +100,31 @@ int row = 0, col = n - 1;
 - **感悟/易错点：** 第二遍必须用 `*=`（叠加）不是 `=`（覆盖），否则丢第一遍结果（ERR-012）；"先赋值再更新"顺序不能反；不能用除法（有0会崩）
 
 ### 3. 缺失的第一个正数（Hard）
-- **核心思路：**
+- **核心思路：** 原地哈希。答案必在 [1, n+1]。把值 x 归位到索引 x-1（原地哈希），归位后扫描第一个不对的位置就是答案。只处理 [1,n] 的值
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
+  ```java
+  class Solution {
+      public int firstMissingPositive(int[] nums) {
+          int n = nums.length;
+          for (int i = 0; i < n; i++) {
+              // 值在[1,n] 且 目标位置不是我 → 交换归位
+              while (1 <= nums[i] && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {
+                  int correctPos = nums[i] - 1;   // 值 x 应在索引 x-1
+                  int temp = nums[correctPos];
+                  nums[correctPos] = nums[i];
+                  nums[i] = temp;
+              }
+          }
+          for (int i = 0; i < n; i++) {
+              if (nums[i] != i + 1) return i + 1;  // 第一个位置不对 → 缺失它
+          }
+          return n + 1;   // 全归位 → 1~n 都在 → 缺失 n+1
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（看思路后写出 + 自行发现死循环 bug）
+- **感悟/易错点：** 核心洞察"答案在[1,n+1]"是难点；死循环保护 `nums[nums[i]-1] != nums[i]`（ERR-013）；值 x → 索引 x-1 的 off-by-one；while 不是 if（交换后新值可能还要归位）
 - **感悟/易错点：**
 
 ### 4. 矩阵置零（Medium）
