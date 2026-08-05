@@ -75,11 +75,29 @@ int row = 0, col = n - 1;
 - **感悟/易错点：** 漏了 `k %= n` 导致越界（ERR-011）；三次翻转顺序不能变；reverse 双指针用 start<end
 
 ### 2. 除自身以外数组的乘积（Medium）
-- **核心思路：**
+- **核心思路：** 两遍扫描。第一遍从左到右存"左边积"到 res；第二遍从右到左把"右边积"乘上去。答案 = 左积 × 右积
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public int[] productExceptSelf(int[] nums) {
+          int[] res = new int[nums.length];
+          int left = 1;
+          for (int i = 0; i < nums.length; i++) {
+              res[i] = left;       // 第一遍：存左边积
+              left *= nums[i];
+          }
+          int right = 1;
+          for (int i = nums.length - 1; i >= 0; i--) {
+              res[i] = res[i] * right;   // 第二遍：乘上右边积（叠加！）
+              right *= nums[i];
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)（res 不算）
+- **掌握程度：** ✅
+- **感悟/易错点：** 第二遍必须用 `*=`（叠加）不是 `=`（覆盖），否则丢第一遍结果（ERR-012）；"先赋值再更新"顺序不能反；不能用除法（有0会崩）
 
 ### 3. 缺失的第一个正数（Hard）
 - **核心思路：**
