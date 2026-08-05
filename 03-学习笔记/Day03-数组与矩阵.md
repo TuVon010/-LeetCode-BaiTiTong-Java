@@ -128,10 +128,36 @@ int row = 0, col = n - 1;
 - **感悟/易错点：**
 
 ### 4. 矩阵置零（Medium）
-- **核心思路：**
+- **核心思路：** 用第一行第一列当标记板。先备份首行首列是否有0，再扫描内部打标记，根据标记置零，最后处理首行首列本身
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
+  ```java
+  class Solution {
+      public void setZeroes(int[][] matrix) {
+          int m = matrix.length, n = matrix[0].length;
+          boolean firstRowHasZero = false, firstColHasZero = false;
+          for (int j = 0; j < n; j++) if (matrix[0][j] == 0) firstRowHasZero = true;
+          for (int i = 0; i < m; i++) if (matrix[i][0] == 0) firstColHasZero = true;
+          for (int i = 1; i < m; i++) {
+              for (int j = 1; j < n; j++) {
+                  if (matrix[i][j] == 0) {
+                      matrix[i][0] = 0;   // 标记第 i 行
+                      matrix[0][j] = 0;   // 标记第 j 列
+                  }
+              }
+          }
+          for (int i = 1; i < m; i++) {
+              for (int j = 1; j < n; j++) {
+                  if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;
+              }
+          }
+          if (firstRowHasZero) for (int j = 0; j < n; j++) matrix[0][j] = 0;
+          if (firstColHasZero) for (int i = 0; i < m; i++) matrix[i][0] = 0;
+      }
+  }
+  ```
+- **复杂度：** O(m×n) / O(1)
+- **掌握程度：** 🟡（看思路后写出，但二维数组访问不熟）
+- **感悟/易错点：** 二维数组访问是短板（REV-11）——`matrix.length`=行、`matrix[0].length`=列、`matrix[i][j]`；处理整行动 j、整列动 i；标记与置零必须分两步（防雪崩）；先备份首行首列
 - **感悟/易错点：**
 
 ### 5. 螺旋矩阵（Medium）
