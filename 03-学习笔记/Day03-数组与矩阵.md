@@ -161,10 +161,36 @@ int row = 0, col = n - 1;
 - **感悟/易错点：**
 
 ### 5. 螺旋矩阵（Medium）
-- **核心思路：**
+- **核心思路：** 边界收缩法（剥洋葱）。维护 top/bottom/left/right 四边界，按 右→下→左→上 遍历，每走完一边收缩对应边界。下边/左边前要检查边界防重复
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
+  ```java
+  import java.util.*;
+  class Solution {
+      public List<Integer> spiralOrder(int[][] matrix) {
+          List<Integer> res = new ArrayList<>();
+          int top = 0, bottom = matrix.length - 1;
+          int left = 0, right = matrix[0].length - 1;
+          while (top <= bottom && left <= right) {
+              for (int i = left; i <= right; i++) res.add(matrix[top][i]);  // 上边
+              top++;
+              for (int i = top; i <= bottom; i++) res.add(matrix[i][right]); // 右边
+              right--;
+              if (top <= bottom) {                                            // ⭐ 下边检查
+                  for (int i = right; i >= left; i--) res.add(matrix[bottom][i]);
+                  bottom--;
+              }
+              if (left <= right) {                                            // ⭐ 左边检查
+                  for (int i = bottom; i >= top; i--) res.add(matrix[i][left]);
+                  left++;
+              }
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(m×n) / O(1)
+- **掌握程度：** ✅（看思路后写出，补了边界检查）
+- **感悟/易错点：** 漏了"下边看上下(top<=bottom)、左边看左右(left<=right)"检查会重复遍历（ERR-014）；正好练了二维数组访问（REV-11）
 - **感悟/易错点：**
 
 ### 6. 旋转图像（Medium）
