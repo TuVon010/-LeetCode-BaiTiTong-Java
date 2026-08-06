@@ -144,18 +144,51 @@ return false;
 - **感悟/易错点：** 快慢指针 while 条件 `fast != null && fast.next != null`（短路防空指针）；slow 停在"后半段起点"；反转结束后头是 pre 不是 slow；奇数链表中间节点和自己比一次不影响结果；学员第一版用"复制+反转+比较"O(n) 空间，边界多造一个空节点（隐藏雷），正解 O(1)
 
 ### 4. 环形链表（Easy）
-- **核心思路：**
+- **核心思路：** 快慢指针判环。slow 走 1 步、fast 走 2 步，有环则 fast 套圈追上 slow（引用 == 相遇）。备选：哈希集合存节点，遇到重复即有环
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  public class Solution {
+      public boolean hasCycle(ListNode head) {
+          ListNode slow = head, fast = head;
+          while (fast != null && fast.next != null) {   // fast 走2步，先判自身再判 next（短路）
+              slow = slow.next;
+              fast = fast.next.next;
+              if (slow == fast) return true;            // 相遇 = 有环（引用 ==）
+          }
+          return false;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（学员看提醒后独立写出）
+- **感悟/易错点：** `fast != null && fast.next != null` 顺序不能反（防空指针）；相遇判定用 `==` 不是 `.val ==`；面试策略"先写哈希 O(n) 再优化 O(1)"更好
 
 ### 5. 环形链表 II（Medium）
-- **核心思路：**
+- **核心思路：** 141 + 找入口。快慢相遇后，一个指针回 head，两个都走 1 步，再相遇处 = 环入口。数学：设 a=头→入口，b=入口→相遇点，c=环长，fast=2×slow → `a = (c-b) + 整圈`，所以"从头走 a"与"从相遇点走 c-b"在入口汇合
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  public class Solution {
+      public ListNode detectCycle(ListNode head) {
+          ListNode slow = head, fast = head;
+          while (fast != null && fast.next != null) {
+              slow = slow.next;
+              fast = fast.next.next;
+              if (slow == fast) {                 // 有环，找到相遇点
+                  ListNode p = head;              // 一个回 head
+                  while (p != slow) {             // 都走 1 步
+                      p = p.next;
+                      slow = slow.next;
+                  }
+                  return p;                       // 再相遇 = 环入口
+              }
+          }
+          return null;                            // 无环
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（学员独立写出 + 自己讲解数学推导 a+nb）
+- **感悟/易错点：** 学员自己讲清"slow 走了 nb、fast 走了 2nb，再走 a 回到起点"；结论"相遇后一回头就是入口"是套路要背住；哈希法更直白（第一次重复节点=入口）但 O(n) 空间；面试最佳=先哈希再优化双指针
 
 ### 6. 合并两个有序链表（Easy）
 - **核心思路：**
