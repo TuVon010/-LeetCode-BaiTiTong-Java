@@ -106,11 +106,42 @@ return false;
 - **感悟/易错点：** 三指针口诀："tmp 是护身符，改 next 前先保存"；"没存 tmp 别改 next，改了后面就丢"；循环结束条件 cur==null，返回 pre；递归关键 = "接到尾巴（head.next）上，不是接到新头（newHead）上"
 
 ### 3. 回文链表（Easy）
-- **核心思路：**
+- **核心思路：** 三步走：①快慢指针找中点（slow 停在后半段起点）②反转后半段（三指针法）③前半段 vs 反转后的后半段比较。O(1) 空间，不复制整条链
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public boolean isPalindrome(ListNode head) {
+          // 1. 快慢指针找中点（fast 走2步、slow 走1步）
+          ListNode slow = head, fast = head;
+          while (fast != null && fast.next != null) {   // 先判 fast 再判 fast.next（短路）
+              slow = slow.next;
+              fast = fast.next.next;
+          }
+          // slow 现在指向后半段起点（偶数=右半起点，奇数=正中间）
+
+          // 2. 反转后半段（三指针法）
+          ListNode pre = null;
+          while (slow != null) {
+              ListNode temp = slow.next;
+              slow.next = pre;
+              pre = slow;      // pre 是反转后的头（不是 slow！slow 最后是 null）
+              slow = temp;
+          }
+
+          // 3. 前半段 vs 反转后的后半段
+          ListNode left = head, right = pre;
+          while (right != null) {
+              if (left.val != right.val) return false;
+              left = left.next;
+              right = right.next;
+          }
+          return true;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（学员独立写出标准解法 + 主动标注 3 个易错点）
+- **感悟/易错点：** 快慢指针 while 条件 `fast != null && fast.next != null`（短路防空指针）；slow 停在"后半段起点"；反转结束后头是 pre 不是 slow；奇数链表中间节点和自己比一次不影响结果；学员第一版用"复制+反转+比较"O(n) 空间，边界多造一个空节点（隐藏雷），正解 O(1)
 
 ### 4. 环形链表（Easy）
 - **核心思路：**
