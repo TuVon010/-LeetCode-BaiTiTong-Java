@@ -251,11 +251,38 @@ return false;
 - **感悟/易错点：** ⭐ 加法进位模式 `carry = sum/10` + `cur = sum%10`（REV-17）；学员两遍法正确但较长；标准单遍法优势：`l1==null?0:l1.val` 一行处理长度不等、`carry!=0` 兜底最高位；"短的补0"是这类题通用技巧
 
 ### 8. 删除链表的倒数第 N 个节点（Medium）
-- **核心思路：**
+- **核心思路：** 双指针拉开 n 步。fast 先走 n 步，再与 slow 同步走，fast 到尾时 slow 停在"要删节点的前一个"，跳过即可。虚拟头处理删头节点
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public ListNode removeNthFromEnd(ListNode head, int n) {
+          // 学员版：pre 显式跟踪前一个
+          ListNode fast = head, slow = head;
+          ListNode dummy = new ListNode(-1);
+          dummy.next = head;
+          ListNode pre = dummy;
+          for (int i = 0; i < n; i++) fast = fast.next;   // fast 先走 n 步
+          while (fast != null) {
+              fast = fast.next;
+              slow = slow.next;
+              pre = pre.next;
+          }
+          pre.next = slow.next;       // 跳过要删的节点
+          return dummy.next;
+
+          // 标准版：slow 从 dummy 起步，天然停在目标前一个
+          // ListNode dummy = new ListNode(-1, head);
+          // ListNode fast = head, slow = dummy;
+          // for (int i = 0; i < n; i++) fast = fast.next;
+          // while (fast != null) { fast = fast.next; slow = slow.next; }
+          // slow.next = slow.next.next;
+          // return dummy.next;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(1)
+- **掌握程度：** ✅（学员独立写出三指针版 + pre 跟踪前一个）
+- **感悟/易错点：** "倒数第 N 个"统一模板：虚拟头 + fast 先走 n 步 + 同步走到 fast 到尾 + 跳过目标；两种写法本质相同（slow 停在目标前一个）；删头节点靠 dummy 处理
 
 ---
 
