@@ -144,11 +144,32 @@ pre = groupHead;
 - **感悟/易错点：** ① `while(true)`：出口在循环体中间（探测不够就 return），是"中间出口循环"模式，不是死循环；② `cur` 跨轮次当 nextStart 用（状态保持）；③ 反转条件 `p != nextStart` 已够用（探测保证够 k 个，p 恰好停在 nextStart）；④ 三步重连顺序：接新头 → 组尾接下一组 → pre 移到组尾；⑤ 写完检查"声明了但没用"的变量（groupEnd）
 
 ### 3. 随机链表的复制（Medium）
-- **核心思路：**
+- **核心思路：** 深拷贝 + 对照表。核心问题：random 可能指向后面的节点，遍历时副本还没建好 → 所以分两遍。**第一遍只建节点**（`map.put(旧, new Node(旧.val))`），**第二遍连指针**（`map.get(旧).next = map.get(旧.next)`、`.random = map.get(旧.random)`）。`map.get(null)` 自动处理 random 为 null，不用特判
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // HashMap 两遍法（标准）
+  class Solution {
+      public Node copyRandomList(Node head) {
+          if (head == null) return null;
+          Map<Node, Node> map = new HashMap<>();   // 对照表：旧 → 新
+          Node cur = head;
+          while (cur != null) {                    // ① 先办证：只建节点
+              map.put(cur, new Node(cur.val));
+              cur = cur.next;
+          }
+          cur = head;
+          while (cur != null) {                    // ② 再填表：靠 map 翻译指针
+              map.get(cur).next = map.get(cur.next);
+              map.get(cur).random = map.get(cur.random);
+              cur = cur.next;
+          }
+          return map.get(head);
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(n)（map 存 n 个副本）
+- **掌握程度：** 🔄（听懂了，但自觉"第二次不一定能想到"，需复习）
+- **感悟/易错点：** ① 两行核心翻译：`map.get(cur).next = map.get(cur.next)`（左边新节点属性，右边查词典）；② 为什么第一遍只建、第二遍才连——random 往前指，副本没建好；口诀"**先办证，再填表**"；③ `map.get(null)` 免费处理 random=null；④ 学员的 List 法思路对但 O(n²)（indexOf 线性扫）——用空间换时间；⑤ `Node` 只有单参构造器，不能直接塞旧指针（否则浅拷贝）
 
 ### 4. 排序链表（Medium）
 - **核心思路：**
@@ -179,14 +200,16 @@ pre = groupHead;
 - 分组反转（25）：`while(true)` 中间出口 + 探测够 K 个 + 组内三指针反转 + 三步重连
 - 递归两两交换（24）：基准 → 递归处理后面 → 处理自己 → 返回新头（REV-18）
 - "中间出口循环"模式：出口在循环体中间（`return`），用 `while(true)` 最清晰
+- 深拷贝 + 对照表（138）：先办证（只建节点）→ 再填表（map 翻译指针），`map.get(null)` 处理 null
 
 **遇到的困难：**
 - 25 第一版写乱（p 未定义、flag 未复位、反转条件错误）→ 拆成"探测/反转/重连"三步后能对照重建
-- 学员诚实评估：25 是"对照思路重建"非"独立写出"，标 🔄 待 Day 6 复写
+- 138 自觉"第二次不一定能想到"→ 深拷贝是对照表套路，靠 REV-20 复习，不强求一遍记住
+- 学员诚实评估：25/138 都是"看懂/重建"非"独立写出"，标 🔄
 
 **遗留问题（需复习）：**
-- REV-19：25 独立复写（真正的毕业考）
+- REV-19（25）、REV-20（138 对照表）待 Day 6 复习
 - REV-14/15/16/17 待复习
-- Day 5 剩余 4 题：148 排序链表 / 138 随机链表复制 / 146 LRU / 23 合并 K 个升序链表
+- Day 5 剩余 3 题：**23 合并 K 个升序链表（明天先做）** / 146 LRU / 148 排序链表
 
-**整体感受：** 😊
+**整体感受：** 😊（今天 3 题都学到新套路，自觉有难度但能跟上）
