@@ -221,11 +221,34 @@ return false;
 - **感悟/易错点：** ⭐ 合并不需要"断链"——学员把反转的习惯（temp 存 + cur.next=null）带进来了。判断口诀：**改自己的 next（`cur.next=xxx`）才要 temp 先存；改别人的 next（`p.next=xxx`）不用管原链表，直接走**（REV-16）
 
 ### 7. 两数相加（Medium）
-- **核心思路：**
+- **核心思路：** 链表逆序存数，头就是个位 → 竖式加法从个位开始加。标准解法：单遍法用一个 `carry` 变量，边加边进位。短的链表用 0 补位。`carry != 0` 写进 while 条件自动处理最高位进位
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+          ListNode dummy = new ListNode(-1);
+          ListNode p = dummy;
+          int carry = 0;                          // 进位变量
+
+          while (l1 != null || l2 != null || carry != 0) {  // ⭐ carry!=0 兜底最高位
+              int sum = (l1 == null ? 0 : l1.val)   // 短链表补 0
+                      + (l2 == null ? 0 : l2.val)
+                      + carry;
+
+              carry = sum / 10;                    // 进位（18/10 = 1）
+              p.next = new ListNode(sum % 10);     // 当前位（18%10 = 8）
+
+              p = p.next;
+              if (l1 != null) l1 = l1.next;
+              if (l2 != null) l2 = l2.next;
+          }
+          return dummy.next;
+      }
+  }
+  ```
+- **复杂度：** O(max(m,n)) / O(1)
+- **掌握程度：** ✅（学员用两遍法独立 AC：先算原始和，再统一进位）
+- **感悟/易错点：** ⭐ 加法进位模式 `carry = sum/10` + `cur = sum%10`（REV-17）；学员两遍法正确但较长；标准单遍法优势：`l1==null?0:l1.val` 一行处理长度不等、`carry!=0` 兜底最高位；"短的补0"是这类题通用技巧
 
 ### 8. 删除链表的倒数第 N 个节点（Medium）
 - **核心思路：**
