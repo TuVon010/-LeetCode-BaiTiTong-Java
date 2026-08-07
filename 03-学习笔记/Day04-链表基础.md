@@ -191,11 +191,34 @@ return false;
 - **感悟/易错点：** 学员自己讲清"slow 走了 nb、fast 走了 2nb，再走 a 回到起点"；结论"相遇后一回头就是入口"是套路要背住；哈希法更直白（第一次重复节点=入口）但 O(n) 空间；面试最佳=先哈希再优化双指针
 
 ### 6. 合并两个有序链表（Easy）
-- **核心思路：**
+- **核心思路：** 虚拟头节点 + 双指针取小。dummy 避免特判头节点；每次接小的到 p 后面；一条走完后直接把另一条整条接上
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+          ListNode dummy = new ListNode(-1);
+          ListNode p = dummy;                 // p 在新链表上游走
+
+          while (list1 != null && list2 != null) {
+              if (list1.val < list2.val) {
+                  p.next = list1;
+                  list1 = list1.next;         // 直接走，不用 temp
+              } else {
+                  p.next = list2;
+                  list2 = list2.next;
+              }
+              p = p.next;                     // p 前进到新接上的节点
+          }
+
+          p.next = (list1 == null) ? list2 : list1;   // 接上剩余整条
+
+          return dummy.next;                  // 跳过虚拟头
+      }
+  }
+  ```
+- **复杂度：** O(m+n) / O(1)
+- **掌握程度：** ✅（学员 AC，双指针取小 + 虚拟头正确，可再简洁）
+- **感悟/易错点：** ⭐ 合并不需要"断链"——学员把反转的习惯（temp 存 + cur.next=null）带进来了。判断口诀：**改自己的 next（`cur.next=xxx`）才要 temp 先存；改别人的 next（`p.next=xxx`）不用管原链表，直接走**（REV-16）
 
 ### 7. 两数相加（Medium）
 - **核心思路：**
