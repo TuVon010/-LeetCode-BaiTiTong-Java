@@ -318,10 +318,16 @@ pre = groupHead;
   //         return size() > capacity;
   //     }
   // }
+
+  // ⭐ 最优版：单哨兵循环双向链表（灵茶山艾府，REV-24 推荐默写）
+  // 只有一个 dummy，既是头也是尾；空链表时 dummy.prev = dummy.next = dummy
+  // getNode(key)：查 map → 有就 remove 抽出来 + pushFront 放最上面 → 返回
+  // remove(x)：x.prev.next = x.next; x.next.prev = x.prev;          (2 行)
+  // pushFront(x)：x.prev=dummy; x.next=dummy.next; dummy.next.prev=x; dummy.next=x;  (4 行)
   ```
 - **复杂度：** O(1) / O(capacity)
-- **掌握程度：** ✅（理解原理 + 找到 LinkedHashMap 现成版，两版都会）
-- **感悟/易错点：** ① 核心一句话：**HashMap 管找，双向链表管顺序**；头部=最新、尾部=最旧；② get 也要 moveToHead（被用到=最近使用）；③ 删尾部必须同步 `map.remove(key)`（链表和 map 两个系统）；④ 双向链表才能 O(1) 删节点（知道前驱）；哨兵 head/tail 免判空；⑤ LinkedHashMap `true`=accessOrder 自动移尾部，`removeEldestEntry` 满了删最老——和手写版方向相反（尾=新 vs 头=新）但原理相同；⑥ 面试策略：手写版（懂原理）+ LinkedHashMap（熟标准库）两个都说得出
+- **掌握程度：** ✅（理解原理 + LinkedHashMap 现成版 + 单哨兵循环最优版，三版都见过；双向链表基础待 REV-24 复习）
+- **感悟/易错点：** ① 核心一句话：**HashMap 管找，双向链表管顺序**；最新=`dummy.next`、最旧=`dummy.prev`；② get 也要 moveToHead（被用到=最近使用）；③ 删节点必须同步 `map.remove(key)`（链表和 map 两个系统）；④ **双向链表灵魂 = 两个原子操作**：remove（改前一本 next + 后一本 prev，2 行）+ pushFront（先接自己两手再改邻居，4 行），其他全是拼装；⑤ 单哨兵循环版免判空（dummy 自己指自己成环）；⑥ LinkedHashMap `true`=accessOrder 自动移尾部 + `removeEldestEntry` 满了删最老；⑦ 面试策略：手写版（懂原理）+ LinkedHashMap（熟标准库）两个都说得出
 
 ---
 
@@ -346,9 +352,10 @@ pre = groupHead;
 - 148 快慢指针同起点会 2 节点死循环 → "要切断就慢半步，要定位就同步走"（REV-22）
 - 146 学员先想"哈希嵌套"（Map<Integer,Map>）→ 是 LFU 思路不是 LRU（次数≠顺序）→ 引导到 HashMap+双向链表
 - 146 学员迷惑时 → 给出完整代码逐行注释，再拆 5 个关键疑问点；学员找到 LinkedHashMap 现成版，两版原理打通
+- 146 学员找到单哨兵循环最优版（灵茶山艾府）→ 确认最漂亮；学员坦言"双向链表设置不会"→ 从零讲透 Node/remove/pushFront 两个原子操作，登记 REV-24 专项复习
 
 **遗留问题（需复习）：**
-- REV-19（25）、REV-20（138）、REV-21（堆）、REV-22（148）、REV-23（LRU）待复习
+- REV-19（25）、REV-20（138）、REV-21（堆）、REV-22（148）、REV-23（LRU）、REV-24（双向链表基础）待复习
 - REV-14/15/16/17 待复习
 - 23 递归分治版待 Day 6 二叉树后回炉
 - **Day 5 全部 6/6 收官！** 进 Day 6 二叉树基础
