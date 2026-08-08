@@ -326,8 +326,8 @@ pre = groupHead;
   // pushFront(x)：x.prev=dummy; x.next=dummy.next; dummy.next.prev=x; dummy.next=x;  (4 行)
   ```
 - **复杂度：** O(1) / O(capacity)
-- **掌握程度：** ✅（理解原理 + LinkedHashMap 现成版 + 单哨兵循环最优版，三版都见过；双向链表基础待 REV-24 复习）
-- **感悟/易错点：** ① 核心一句话：**HashMap 管找，双向链表管顺序**；最新=`dummy.next`、最旧=`dummy.prev`；② get 也要 moveToHead（被用到=最近使用）；③ 删节点必须同步 `map.remove(key)`（链表和 map 两个系统）；④ **双向链表灵魂 = 两个原子操作**：remove（改前一本 next + 后一本 prev，2 行）+ pushFront（先接自己两手再改邻居，4 行），其他全是拼装；⑤ 单哨兵循环版免判空（dummy 自己指自己成环）；⑥ LinkedHashMap `true`=accessOrder 自动移尾部 + `removeEldestEntry` 满了删最老；⑦ 面试策略：手写版（懂原理）+ LinkedHashMap（熟标准库）两个都说得出
+- **掌握程度：** 🔄（三版都见过，但学员在原基础上改，未独立写出；4 个 bug 登记 ERR-017，待 Day 6 重做）
+- **感悟/易错点：** ① 核心一句话：**HashMap 管找，双向链表管顺序**；最新=`dummy.next`、最旧=`dummy.prev`；② get 也要 moveToHead（被用到=最近使用）；③ 删节点必须同步 `map.remove(key)`（链表和 map 两个系统）；④ **双向链表灵魂 = 两个原子操作**：remove（改前一本 next + 后一本 prev，2 行）+ pushFront（先接自己两手再改邻居，4 行），其他全是拼装；⑤ 单哨兵循环版免判空（dummy 自己指自己成环）；⑥ LinkedHashMap `true`=accessOrder 自动移尾部 + `removeEldestEntry` 满了删最老；⑦ 面试策略：手写版（懂原理）+ LinkedHashMap（熟标准库）两个都说得出；⑧ ⭐ ERR-017 四坑：get 要 return / 新节点 addToHead（不是 moveToHead）/ put 先查 key 存在 / 删链同步删 map
 
 ---
 
