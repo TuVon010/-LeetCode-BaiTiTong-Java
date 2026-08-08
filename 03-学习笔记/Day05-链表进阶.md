@@ -257,11 +257,71 @@ pre = groupHead;
 - **感悟/易错点：** ① 堆=自动排序的贩卖机，只记 `offer/poll/peek` 三词；"一堆动态元素反复取最小"→堆，不是单调队列（滑动窗口顺序进出才用队列）；② 堆法顺序"先 poll 取最小，再 offer 它的 next"；`p.next=cur` 与 `offer next` 两行无依赖可换序；③ 递归分治=REV-18 骨架（基准 lo==hi → 递归左右 → 合并自己）；信任递归，不用追踪每一步；④ 顺序两两合并用独立累积变量 res 比原地覆盖 lists[i] 更清晰
 
 ### 6. LRU 缓存（Medium）
-- **核心思路：**
+- **核心思路：** HashMap（O(1) 找）+ 双向链表（O(1) 排顺序）。头部=最新，尾部=最旧；get/put 命中→移到头部（刚用过=最新）；满了→删尾部+同步删 map。三个原子操作：removeNode（摘）/ addToHead（插头部）/ moveToHead（先摘再插）。LinkedHashMap 版是同一个思路的现成封装：`super(capacity, 0.75F, true)` 的 true=按访问顺序自动移尾部，`removeEldestEntry` 满了删最老
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // 手写版（HashMap + 双向链表 + 哨兵）——证明你懂原理，面试用
+  class LRUCache {
+      int capacity;
+      Map<Integer, DNode> map = new HashMap<>();
+      DNode head, tail;                        // 哨兵：head.next=最新, tail.prev=最旧
+      class DNode {
+          int key, value;
+          DNode prev, next;
+          DNode(int k, int v) { key = k; value = v; }
+      }
+      public LRUCache(int capacity) {
+          this.capacity = capacity;
+          head = new DNode(0, 0); tail = new DNode(0, 0);
+          head.next = tail; tail.prev = head;
+      }
+      public int get(int key) {
+          DNode node = map.get(key);
+          if (node == null) return -1;
+          moveToHead(node);
+          return node.value;
+      }
+      public void put(int key, int value) {
+          DNode node = map.get(key);
+          if (node != null) { node.value = value; moveToHead(node); return; }
+          DNode newNode = new DNode(key, value);
+          map.put(key, newNode);
+          addToHead(newNode);
+          if (map.size() > capacity) {          // 满了删最旧
+              DNode removed = tail.prev;
+              removeNode(removed);
+              map.remove(removed.key);          // ⭐ map 同步删！
+          }
+      }
+      private void removeNode(DNode node) {     // 双向链表 O(1) 摘除
+          node.prev.next = node.next;
+          node.next.prev = node.prev;
+      }
+      private void addToHead(DNode node) {      // 插到 head 之后
+          node.prev = head; node.next = head.next;
+          head.next.prev = node; head.next = node;
+      }
+      private void moveToHead(DNode node) { removeNode(node); addToHead(node); }
+  }
+
+  // LinkedHashMap 版（标准库封装，实战简洁）——能 AC，但面试要能讲出手写版原理
+  // class LRUCache extends LinkedHashMap<Integer, Integer> {
+  //     private int capacity;
+  //     public LRUCache(int capacity) {
+  //         super(capacity, 0.75F, true);   // true=accessOrder 按访问顺序
+  //         this.capacity = capacity;
+  //     }
+  //     public int get(int key) { return super.getOrDefault(key, -1); }
+  //     public void put(int key, int value) { super.put(key, value); }
+  //     @Override
+  //     protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+  //         return size() > capacity;
+  //     }
+  // }
+  ```
+- **复杂度：** O(1) / O(capacity)
+- **掌握程度：** ✅（理解原理 + 找到 LinkedHashMap 现成版，两版都会）
+- **感悟/易错点：** ① 核心一句话：**HashMap 管找，双向链表管顺序**；头部=最新、尾部=最旧；② get 也要 moveToHead（被用到=最近使用）；③ 删尾部必须同步 `map.remove(key)`（链表和 map 两个系统）；④ 双向链表才能 O(1) 删节点（知道前驱）；哨兵 head/tail 免判空；⑤ LinkedHashMap `true`=accessOrder 自动移尾部，`removeEldestEntry` 满了删最老——和手写版方向相反（尾=新 vs 头=新）但原理相同；⑥ 面试策略：手写版（懂原理）+ LinkedHashMap（熟标准库）两个都说得出
 
 ---
 
@@ -275,19 +335,22 @@ pre = groupHead;
 - 堆（PriorityQueue，23）：offer/poll/peek，"自动排序的贩卖机"，反复取最小；小顶堆比较器
 - 分治递归（23）：对半拆到 1 条再两两合并，REV-18 骨架复用
 - 链表归并排序（148）：找中点切断（fast=head.next 慢半步）+ 递归排两半 + 21 合并
+- LRU 缓存（146）：HashMap（找）+ 双向链表（顺序），三个原子操作 removeNode/addToHead/moveToHead
 
 **遇到的困难：**
 - 25 第一版写乱（p 未定义、flag 未复位、反转条件错误）→ 拆成"探测/反转/重连"三步后能对照重建
 - 138 自觉"第二次不一定能想到"→ 深拷贝是对照表套路，靠 REV-20 复习，不强求一遍记住
 - 23 堆方法没学过 → 用"自动排序贩卖机"类比讲透 offer/poll/peek；区分堆 vs 单调队列
 - 23 递归分治没学过 → 讲 REV-18 骨架复用 + "信任递归"；明确可不强求，Day 6 二叉树再回炉
-- 148 学员插入排序思路正确但 O(n²) + 漏 break 成环 → 归并更适合链表；三个 bug（缺基准/left=sortList(slow)/合并漏 p.next）→ 修好 AC
+- 148 学员插入排序思路正确但 O(n²) + 漏 break 成环 → 归并更适合链表；三个 bug → 修好 AC
 - 148 快慢指针同起点会 2 节点死循环 → "要切断就慢半步，要定位就同步走"（REV-22）
+- 146 学员先想"哈希嵌套"（Map<Integer,Map>）→ 是 LFU 思路不是 LRU（次数≠顺序）→ 引导到 HashMap+双向链表
+- 146 学员迷惑时 → 给出完整代码逐行注释，再拆 5 个关键疑问点；学员找到 LinkedHashMap 现成版，两版原理打通
 
 **遗留问题（需复习）：**
-- REV-19（25）、REV-20（138）、REV-21（堆）、REV-22（148 归并 + 快慢指针慢半步）待复习
+- REV-19（25）、REV-20（138）、REV-21（堆）、REV-22（148）、REV-23（LRU）待复习
 - REV-14/15/16/17 待复习
 - 23 递归分治版待 Day 6 二叉树后回炉
-- Day 5 剩 1 题：**146 LRU 缓存**（做完 Day 5 收官，进 Day 6 二叉树）
+- **Day 5 全部 6/6 收官！** 进 Day 6 二叉树基础
 
-**整体感受：** 😊（今天 5 题，23/148 独立 AC，状态非常好）
+**整体感受：** 😊（Day 5 收官！6/6，含 3 道 Hard，进度 34%）
