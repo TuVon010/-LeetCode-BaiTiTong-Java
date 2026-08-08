@@ -172,7 +172,41 @@ pre = groupHead;
 - **感悟/易错点：** ① 两行核心翻译：`map.get(cur).next = map.get(cur.next)`（左边新节点属性，右边查词典）；② 为什么第一遍只建、第二遍才连——random 往前指，副本没建好；口诀"**先办证，再填表**"；③ `map.get(null)` 免费处理 random=null；④ 学员的 List 法思路对但 O(n²)（indexOf 线性扫）——用空间换时间；⑤ `Node` 只有单参构造器，不能直接塞旧指针（否则浅拷贝）
 
 ### 4. 排序链表（Medium）
-- **核心思路：**
+- **核心思路：** 链表上的归并排序（O(n·log n) / O(1)）。三步：①快慢指针找中点并切断（**fast = head.next 慢半步**，slow 停在断口前）②递归排两半 ③合并（21 题 twoCompare 原样）。三个零件全是已学旧题：找中点=234、递归=REV-18、合并=21/23
+- **代码实现：**
+  ```java
+  class Solution {
+      public ListNode sortList(ListNode head) {
+          if (head == null || head.next == null) return head;  // ① 基准（递归刹车）
+
+          // ② 快慢指针找中点（⭐ 要切断，fast 慢半步 = head.next）
+          ListNode slow = head, fast = head.next;
+          while (fast != null && fast.next != null) {
+              slow = slow.next;
+              fast = fast.next.next;
+          }
+          ListNode mid = slow.next;    // 后半段起点
+          slow.next = null;            // 断开
+
+          // ③ 递归排两半（⭐ 左半段从 head 开始，不是 slow！）
+          ListNode left = sortList(head);
+          ListNode right = sortList(mid);
+
+          // ④ 合并（21 题原样）
+          ListNode dummy = new ListNode(-1), p = dummy;
+          while (left != null && right != null) {
+              if (left.val < right.val) { p.next = left; left = left.next; }
+              else { p.next = right; right = right.next; }
+              p = p.next;              // ⭐ 别忘了 p 前进
+          }
+          p.next = (left != null) ? left : right;   // 循环外接尾巴
+          return dummy.next;
+      }
+  }
+  ```
+- **复杂度：** O(n·log n) / O(1)
+- **掌握程度：** ✅（学员写出归并骨架，修好 3 个 bug 后 AC；易错点登记 REV-22）
+- **感悟/易错点：** ① 基准条件 `head==null || head.next==null` = 递归刹车，缺了单节点栈溢出；② `left = sortList(head)` 不是 `sortList(slow)`（slow 是尾巴不是头，会丢前半段）；③ 合并循环漏 `p = p.next`（p 原地不动串链）+ 接尾 if 必须放循环外；④ ⭐ **fast = head.next 慢半步**：148 要切断链，slow 必须停在断口前；234/141/142 只要定位，用 `fast = head`。口诀"**要切断就慢半步，要定位就同步走**"
 
 ### 5. 合并 K 个升序链表（Hard）
 - **核心思路：** 21 合并两个有序链表的"K 条升级版"。三种解法：①顺序两两合并（复用 21，O(K·n)，最稳）②优先队列堆（所有头进小顶堆，poll 取最小 + 把 next 补进，O(n·logK)，最炫）③分治递归（对半拆到 1 条，再两两合，O(n·logK)，不用堆也最优）。堆核心方法：`offer`（加）、`poll`（取最小）、`peek`（看最小）；小顶堆比较器 `(a,b)->a.val-b.val`
@@ -240,18 +274,20 @@ pre = groupHead;
 - 深拷贝 + 对照表（138）：先办证（只建节点）→ 再填表（map 翻译指针），`map.get(null)` 处理 null
 - 堆（PriorityQueue，23）：offer/poll/peek，"自动排序的贩卖机"，反复取最小；小顶堆比较器
 - 分治递归（23）：对半拆到 1 条再两两合并，REV-18 骨架复用
+- 链表归并排序（148）：找中点切断（fast=head.next 慢半步）+ 递归排两半 + 21 合并
 
 **遇到的困难：**
 - 25 第一版写乱（p 未定义、flag 未复位、反转条件错误）→ 拆成"探测/反转/重连"三步后能对照重建
 - 138 自觉"第二次不一定能想到"→ 深拷贝是对照表套路，靠 REV-20 复习，不强求一遍记住
 - 23 堆方法没学过 → 用"自动排序贩卖机"类比讲透 offer/poll/peek；区分堆 vs 单调队列
 - 23 递归分治没学过 → 讲 REV-18 骨架复用 + "信任递归"；明确可不强求，Day 6 二叉树再回炉
-- 学员诚实评估：25/138 是"看懂/重建"非"独立写出"，标 🔄；23 解法一独立 AC 标 ✅
+- 148 学员插入排序思路正确但 O(n²) + 漏 break 成环 → 归并更适合链表；三个 bug（缺基准/left=sortList(slow)/合并漏 p.next）→ 修好 AC
+- 148 快慢指针同起点会 2 节点死循环 → "要切断就慢半步，要定位就同步走"（REV-22）
 
 **遗留问题（需复习）：**
-- REV-19（25）、REV-20（138 对照表）、REV-21（堆 offer/poll/peek）待 Day 6 复习
+- REV-19（25）、REV-20（138）、REV-21（堆）、REV-22（148 归并 + 快慢指针慢半步）待复习
 - REV-14/15/16/17 待复习
 - 23 递归分治版待 Day 6 二叉树后回炉
-- Day 5 剩余 2 题：**148 排序链表（下次先做，和 23 共用归并思路）** / 146 LRU
+- Day 5 剩 1 题：**146 LRU 缓存**（做完 Day 5 收官，进 Day 6 二叉树）
 
-**整体感受：** 😊（今天 4 题都学到新套路，状态好，23 独立 AC）
+**整体感受：** 😊（今天 5 题，23/148 独立 AC，状态非常好）
