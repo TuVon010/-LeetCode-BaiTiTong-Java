@@ -169,18 +169,58 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① **对称 = 交叉比**：`check(p.left, q.right)`（外侧 vs 外侧）+ `check(p.right, q.left)`（内侧 vs 内侧）；② 类比"照镜子"：你举右手，镜中人是左手，所以 `p.right` 要比 `q.left`；③ 千万别写成 `check(p.left, p.right)`（一棵树自己跟自己比，错）；④ 层序正反比较只对满二叉树碰巧对，缺节点会误判；⑤ 这是"两棵树递归"的入门经典（后面 100 相同的树、572 子树 同款思路）
 
 ### 5. 二叉树的直径（Easy）
-- **核心思路：**
+- **核心思路：** 最长路径一定"拐过"某个节点 = 左子树深度 + 右子树深度。直径 = 所有节点的 `左深+右深` 最大值。**关键分工："向上传单臂，全局记双臂"**——`depth()` 返回最长单臂（给父节点用），`res` 记双臂之和（直径候选）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员理解了"拐点"思路，从"一个函数想干两件事"的误区纠正过来
+  class Solution {
+      int res = 0;   // 全局直径
+      public int diameterOfBinaryTree(TreeNode root) {
+          depth(root);
+          return res;
+      }
+      int depth(TreeNode root) {
+          if (root == null) return 0;
+          int left = depth(root.left);      // 左臂长度
+          int right = depth(root.right);    // 右臂长度
+          res = Math.max(res, left + right);      // ⭐ 全局记双臂（直径候选）
+          return Math.max(left, right) + 1;       // ⭐ 向上传单臂（父节点只要最长那只手）
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** ✅（理解"拐点 + 传单臂记双臂"，自己走通例子）
+- **感悟/易错点：** ① 核心：直径 = `左深+右深`，在递归求深度时顺手更新；② ⭐ **一个函数只干一件事**：`depth` 返回单臂（向上传），`res` 记双臂（全局存），别混在一个返回值里；③ 注意这里是**边数**不是节点数（104 深度是节点数，543 直径是边数，`left+right` 不加额外 1）；④ 和 104 的关系：**就是 maxDepth + 一行**；⑤ 遍历一遍所有节点，每个都算"左臂+右臂"，取最大
 
 ### 6. 二叉树的层序遍历（Medium）
-- **核心思路：**
+- **核心思路：** BFS 层序模板标准形态。`while(!empty)` 每轮处理一整层；`len` 固定当前层节点数；`poll` 弹出节点收集到 tempList；`offer` 把左右孩子入队（下一层）；`res.add(本层)`。每轮 while = 一层
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员独立写出，ERR-018 的 5 个坑全对（模板级代码，值得背）
+  class Solution {
+      public List<List<Integer>> levelOrder(TreeNode root) {
+          List<List<Integer>> res = new ArrayList<>();
+          if (root == null) return res;
+          Deque<TreeNode> queue = new ArrayDeque<>();   // ✅ 泛型写全
+          queue.offer(root);                            // ✅ offer 入队
+          while (!queue.isEmpty()) {
+              int len = queue.size();                   // ✅ 固定当前层人数
+              ArrayList<Integer> tempList = new ArrayList<>();
+              for (int i = 0; i < len; i++) {
+                  TreeNode p = queue.poll();            // ✅ poll 弹出
+                  tempList.add(p.val);
+                  if (p.left != null) queue.offer(p.left);   // ✅ offer 孩子入队
+                  if (p.right != null) queue.offer(p.right);
+              }
+              res.add(tempList);                        // ✅ 本层入结果
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(w)
+- **掌握程度：** ✅（学员独立 AC，ERR-018 全对）
+- **感悟/易错点：** ① **这就是 BFS 层序模板的标准形态**，和 104 的 BFS 版几乎一样，只多 `res.add(tempList)`；② ERR-018 五坑全避免：ArrayDeque/offer/len 固定/poll/不入队非节点；③ 记住骨架："while 判空 → len 固定 → for 弹本层 → offer 孩子 → res 加层"；④ 泛型写全 `new ArrayDeque<>()`
 
 ### 7. 将有序数组转换为二叉搜索树（Easy）
 - **核心思路：**
