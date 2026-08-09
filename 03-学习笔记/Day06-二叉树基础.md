@@ -1,8 +1,8 @@
 # Day 6 · 二叉树基础
 
-> **日期：** 2026-__-__
+> **日期：** 2026-08-09
 > **学习目标：** 二叉树基础——DFS 与 BFS 两大框架
-> **相关知识页：** [[02-Wiki/专题总结/05-二叉树]] · [[02-Wiki/专题总结/08-回溯算法]]
+> **相关知识页：** [[02-Wiki/专题总结/05-二叉树]] · [[02-Wiki/专题总结/08-回溯算法]] · [[02-Wiki/专题总结/00-Java容器方法速查表]]
 
 ---
 
@@ -44,18 +44,82 @@ while (!q.isEmpty()) {
 ## 二、做题记录
 
 ### 1. 二叉树的中序遍历（Easy）
-- **核心思路：**
+- **核心思路：** 中序 = 左 → 根 → 右。递归版：先左再根后右。迭代版用栈模拟递归：**一路向左压栈 → 弹一个访问（根）→ 拐向右**。栈的作用是手动存"往左走时路过的节点"（REV-25 栈）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // 迭代版（学员独立写出 ✅）
+  List<Integer> res = new ArrayList<>();
+  public List<Integer> inorderTraversal(TreeNode root) {
+      Deque<TreeNode> stack = new ArrayDeque<>();   // 栈用 Deque 实现（push/pop）
+      TreeNode p = root;
+      while (p != null || !stack.isEmpty()) {        // 节点存在 或 栈非空
+          if (p != null) {
+              stack.push(p);      // ① 一路向左压栈
+              p = p.left;
+          } else {
+              p = stack.pop();    // ② 弹出最左的
+              res.add(p.val);     // ③ 访问它（此时它是"根"）
+              p = p.right;        // ④ 拐向右子树
+          }
+      }
+      return res;
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** ✅（学员独立写出，逻辑正确）
+- **感悟/易错点：** ① **记忆锚点：一路向左压栈 → 弹一个访问 → 拐向右**；② `!stack.isEmpty()` 比 `stack.size() > 0` 更规范；③ 中序遍历迭代 = 手写栈模拟递归，这题也为 98 验证 BST / 230 第K小 打基础；④ 栈 = Deque 的 `push/pop/peek`（都是操作队头 First 端，见 REV-25 速查表）
 
 ### 2. 二叉树的最大深度（Easy）
-- **核心思路：**
+- **核心思路：** 两种方法。①递归 DFS：`深度 = 1 + max(左子树深度, 右子树深度)`，空节点深度 0。②BFS 层序：一层层数，每层处理完 depth++。两种都是 O(n)，递归栈 O(h)，BFS 队列 O(w)
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ========== 方法一：递归 DFS（学员独立 AC ✅）==========
+  public int maxDepth(TreeNode root) {
+      if (root == null) return 0;                        // 基准：空节点深度 0
+      int leftDepth = maxDepth(root.left);               // 递归：左子树深度
+      int rightDepth = maxDepth(root.right);             // 递归：右子树深度
+      return leftDepth > rightDepth ? (leftDepth + 1) : (rightDepth + 1);
+      // ↑ 等价于 1 + Math.max(leftDepth, rightDepth)，面试更推荐 Math.max 版
+  }
+
+  // ========== 方法二：BFS 层序（学员尝试版，修正 5 个错）==========
+  // ⭐ 学员易错点全标注在这份代码里，复习时逐条对照
+  public int maxDepth(TreeNode root) {
+      if (root == null) return 0;
+      // ❌ 学员错误1：Deque<TreeNode> deque = new ArrayList<>();
+      //    ArrayList 实现 List 不是 Deque！编译错误。
+      //    ✅ Deque 的常用实现是 ArrayDeque 或 LinkedList
+      Deque<TreeNode> queue = new ArrayDeque<>();
+
+      queue.offer(root);              // ✅ 入队用 offer（队尾进）
+      //  ❌ 学员错误2：写了 deque.add(root)，add 是抛异常版，offer 是返回特殊值版，刷题统一 offer
+
+      int depth = 0;
+
+      while (!queue.isEmpty()) {      // ✅ 判空用 isEmpty()
+          // ❌ 学员错误3：for (int i = 0; i < queue.size(); i++)
+          //    循环里入队会让 queue.size() 一直变 → 当前层人数失控
+          //    ✅ 必须先把"当前层节点数"固定下来
+          int size = queue.size();
+          for (int i = 0; i < size; i++) {   // 处理这一整层
+              // ❌ 学员错误4：p = deque.peekFirst(); 只"看"不"弹出"！
+              //    节点永远留在队里 → 死循环
+              //    ✅ 要取出并移除队头，用 poll()
+              TreeNode node = queue.poll();
+              if (node.left != null) queue.offer(node.left);    // ✅ 左孩子入队
+              // ❌ 学员错误5：depth.push(node.right) —— depth 是 int 没有 push 方法！
+              //    ✅ 应该是 queue.offer(node.right)，右孩子入队
+              //    （这是复制粘贴没改名的坑，ERR-016）
+              if (node.right != null) queue.offer(node.right);
+          }
+          depth++;                     // 一层处理完，深度 +1
+      }
+      return depth;
+  }
+  ```
+- **复杂度：** O(n) / O(h)（递归）或 O(w)（BFS，w=最大层宽）
+- **掌握程度：** ✅（递归独立 AC；BFS 思路对，修正 5 个细节后理解）
+- **感悟/易错点：** ① **BFS 精髓：每轮 while = 处理一整层**，先 `int size = queue.size()` 固定人数，for 循环弹完这一层 + 把下一层孩子入队，循环结束 depth++；② Deque 当队列用统一 `offer/poll/peekFirst`，别混用 add/push/peekFirst（REV-25）；③ `peekFirst()` 只看不弹，要弹出用 `poll()`；④ `ArrayList` 不是 Deque，用 `ArrayDeque`；⑤ for 循环条件里的 size 必须在循环前固定；⑥ int 类型没有 push 方法，复制粘贴必须改名（ERR-016）
 
 ### 3. 翻转二叉树（Easy）
 - **核心思路：**
