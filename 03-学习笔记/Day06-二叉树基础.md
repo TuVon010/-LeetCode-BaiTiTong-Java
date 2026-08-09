@@ -122,18 +122,51 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① **BFS 精髓：每轮 while = 处理一整层**，先 `int size = queue.size()` 固定人数，for 循环弹完这一层 + 把下一层孩子入队，循环结束 depth++；② Deque 当队列用统一 `offer/poll/peekFirst`，别混用 add/push/peekFirst（REV-25）；③ `peekFirst()` 只看不弹，要弹出用 `poll()`；④ `ArrayList` 不是 Deque，用 `ArrayDeque`；⑤ for 循环条件里的 size 必须在循环前固定；⑥ int 类型没有 push 方法，复制粘贴必须改名（ERR-016）
 
 ### 3. 翻转二叉树（Easy）
-- **核心思路：**
+- **核心思路：** 交换每个节点的左右孩子（temp 变量）。前序/后序都行，只是"交换"发生在递归前还是后。学员写后序版（先递归翻子树再交换），逻辑更稳。Homebrew 作者被挂的那道题
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // 后序版（学员独立写出 ✅）
+  class Solution {
+      public TreeNode invertTree(TreeNode root) {
+          if (root == null) return null;
+          TreeNode left = invertTree(root.left);     // ① 先翻左子树
+          TreeNode right = invertTree(root.right);   // ② 再翻右子树
+          root.left = right;                         // ③ 交换
+          root.right = left;
+          return root;
+      }
+      // 前序版（交换提前）：
+      // if (root == null) return null;
+      // TreeNode temp = root.left; root.left = root.right; root.right = temp;
+      // invertTree(root.left); invertTree(root.right); return root;
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** ✅（学员独立写出后序版）
+- **感悟/易错点：** ① **核心就一句：翻转 = 交换每个节点的左右孩子（用 temp）**；② 前序/后序只差"交换时机"，都能 AC；③ 空节点基准 `return null`；④ 这题证明了递归骨架（基准 → 递归子问题 → 处理自己）已彻底掌握
 
 ### 4. 对称二叉树（Easy）
-- **核心思路：**
+- **核心思路：** 判断一棵树是否镜像对称 = 检查它的左子树和右子树是否互为镜像（**两棵树递归**）。三个条件：①根值相等 ②外侧比外侧（`p.left ↔ q.right`）③内侧比内侧（`p.right ↔ q.left`）。基准：都空→true、一个空→false、值不等→false。层序遍历正反比较不可靠（缺节点的树会误判），递归交叉最稳
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员看题解后理解写出，核心是"交叉比"（REV-26）
+  class Solution {
+      public boolean isSymmetric(TreeNode root) {
+          if (root == null) return true;
+          return check(root.left, root.right);   // 检查左右子树是否镜像
+      }
+      boolean check(TreeNode p, TreeNode q) {
+          if (p == null && q == null) return true;    // ① 都空 → 对称
+          if (p == null || q == null) return false;   // ② 一个空 → 不对称
+          if (p.val != q.val) return false;           // ③ 值不等 → 不对称
+          return check(p.left, q.right) && check(p.right, q.left);
+          //     ↑ 外侧比外侧           ↑ 内侧比内侧（镜像 = 交叉比）
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** ✅（看题解后理解写出，能解释为什么交叉；交叉比已登记 REV-26）
+- **感悟/易错点：** ① **对称 = 交叉比**：`check(p.left, q.right)`（外侧 vs 外侧）+ `check(p.right, q.left)`（内侧 vs 内侧）；② 类比"照镜子"：你举右手，镜中人是左手，所以 `p.right` 要比 `q.left`；③ 千万别写成 `check(p.left, p.right)`（一棵树自己跟自己比，错）；④ 层序正反比较只对满二叉树碰巧对，缺节点会误判；⑤ 这是"两棵树递归"的入门经典（后面 100 相同的树、572 子树 同款思路）
 
 ### 5. 二叉树的直径（Easy）
 - **核心思路：**
