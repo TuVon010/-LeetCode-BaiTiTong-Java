@@ -94,11 +94,41 @@ public int postorder(TreeNode node) {
 - **感悟/易错点：** ① **199 = 102 层序模板 + 一行**：`if(i == len-1) res.add(p.val)`；② `len-1` 是本层最后一个下标，`i==len-1` 时弹出的就是最右节点；③ ERR-018 五坑全避免（ArrayDeque/offer/固定size/poll/改名）→ BFS 模板已熟练；④ DFS 前序进阶版：先走右子树，每层第一个访问的就是最右（了解即可）
 
 ### 3. 二叉树展开为链表（Medium）
-- **核心思路：**
+- **核心思路：** 把二叉树"压扁"成一条只有右孩子的链，顺序 = 前序。两版解法：①**末尾接上版**（后序：先拉平左右子树，把左链当右链，走到底接上原右链）；②**头插法版**（倒序前序"右→左→根"+ 头插，先访问的被挤到后面，根最后头插在最前 = 前序结果，REV-28）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 解法一：头插法（右左根 + 头插，代码最简，学员找到 C 版并理解原理）
+  class Solution {
+      TreeNode head = null;            // ⭐ 成员变量代替 C 的 TreeNode**（跨递归共享）
+      public void flatten(TreeNode root) {
+          dfs(root);
+      }
+      void dfs(TreeNode root) {
+          if (root == null) return;
+          dfs(root.right);             // 右（先访问的 → 头插后被挤到最后）
+          dfs(root.left);              // 左
+          root.left = null;            // 左置空
+          root.right = head;           // 头插：当前节点接住已有链表头
+          head = root;                 // 更新链表头 = 当前节点
+      }
+  }
+
+  // ⭐ 解法二：末尾接上版（后序，理解更直观）
+  TreeNode flattenTree(TreeNode root) {
+      if (root == null) return null;
+      TreeNode left = flattenTree(root.left);    // ① 左子树拉平，返回链头
+      TreeNode right = flattenTree(root.right);  // ② 右子树拉平，返回链头
+      root.left = null;                          // ③ 左置空
+      root.right = left;                         // ④ 右 = 左链头
+      TreeNode p = root;
+      while (p.right != null) p = p.right;       // ⑤ 走到底找链尾
+      p.right = right;                           // ⑥ 末尾接上右链头
+      return root;
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** 🔄（学员找到头插法 C 版并讲清原理，Java 版需独立默写）
+- **感悟/易错点：** ① 两版对比：**末尾接上版**要 while 走到底找链尾；**头插法版**不用找链尾（每次只插头部），用"访问顺序反过来"抵消"插在头部"；② 🧠 记忆锚点：**"右左根 + 头插 = 前序结果"**——先访问的（右子树）被挤到最后=前序末尾，根最后头插在最前=前序开头；③ 递归顺序（右左根）≠ 结果顺序（前序根左右），别绕晕；④ Java 没有指针，跨递归共享的 head 用**成员变量**；⑤ 头插法 = REV-28 链表高频套路（206 反转 / 25 组内反转 / 114 同款）
 
 ### 4. 从前序与中序遍历构造二叉树（Medium）
 - **核心思路：**
