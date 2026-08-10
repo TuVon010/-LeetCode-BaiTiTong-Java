@@ -67,11 +67,31 @@ public int postorder(TreeNode node) {
 - **感悟/易错点：** ① ⭐ **跨递归共享的计数器必须用全局变量**（成员字段），不能传参——Java 基本类型按值传递，每层递归是"复印件"，子调用改了自己那张，父调用不知道（543 同款教训：黑板 vs 草稿纸）；② `count` 记"访问到第几个"，`result` 记"答案"，两个全局，分工清晰；③ 直接孩子/返回值丢失：左子树找到答案要向上传，用全局 result 绕开；④ **230 = 98 中序模板 + 换中间 3 行**：98 检查递增，230 数到 k 记答案；⑤ 函数末尾必须有 return 或声明 void，别滑出函数（编译错误）
 
 ### 2. 二叉树的右视图（Medium）
-- **核心思路：**
+- **核心思路：** BFS 层序模板 + 一行：**每层最后一个节点就是最右节点**（`if(i == len-1) res.add(p.val)`）。右视图 = 每层取最右
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public List<Integer> rightSideView(TreeNode root) {
+          Deque<TreeNode> queue = new ArrayDeque<>();
+          List<Integer> res = new ArrayList<>();
+          if (root == null) return res;
+          queue.offer(root);
+          while (!queue.isEmpty()) {
+              int len = queue.size();              // 固定本层人数
+              for (int i = 0; i < len; i++) {
+                  TreeNode p = queue.poll();
+                  if (i == len - 1) res.add(p.val);  // ⭐ 本层最后一个 = 最右
+                  if (p.left != null) queue.offer(p.left);
+                  if (p.right != null) queue.offer(p.right);
+              }
+          }
+          return res;
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(w)（w = 最大层宽）
+- **掌握程度：** ✅（学员独立 AC，BFS 模板完全掌握）
+- **感悟/易错点：** ① **199 = 102 层序模板 + 一行**：`if(i == len-1) res.add(p.val)`；② `len-1` 是本层最后一个下标，`i==len-1` 时弹出的就是最右节点；③ ERR-018 五坑全避免（ArrayDeque/offer/固定size/poll/改名）→ BFS 模板已熟练；④ DFS 前序进阶版：先走右子树，每层第一个访问的就是最右（了解即可）
 
 ### 3. 二叉树展开为链表（Medium）
 - **核心思路：**
