@@ -228,11 +228,24 @@ public int postorder(TreeNode node) {
 - **感悟/易错点：** ① ⭐ **前缀和法 = 560 的树形版**：`路径和 = 后代前缀 - 祖先前缀`，查 `map[currSum - target]`；② ⭐ **易错1 先查后记**：先 `res += map.get(currSum-target)` 再 `map.put(currSum,...)`，反了会在 target=0 时把自己当"更早前缀"多算空路径；③ ⭐ **易错2 回溯撤销**：从孩子返回后 `map.put(currSum, map.get(currSum)-1)`——map 记录的是"当前路径上的前缀和"，换分支必须撤销，否则结果偏大；"借了要还"；④ ⭐ **易错3 初始化** `map.put(0L,1)`：让"从根到当前节点整条路径"能被查到；⑤ ⭐ **易错4 用 long**：前缀和可能超 int 范围；⑥ 暴力法思路（枚举起点）也是有效心智模型，先暴力再优化是正道
 
 ### 6. 二叉树的最近公共祖先（Medium）
-- **核心思路：**
+- **核心思路：** 后序递归 + 返回值"向上抛"。`dfs(node)` 在 node 子树里找 p 或 q，找到返回它，找不到返回 null。**关键：左右都非空 ⟺ p、q 分居两侧 → 当前节点是 LCA**（因为都挤一边时另一边必为 null，已被递归滤掉）。单边找到就往上抛
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员独立 AC，把 return left!=null?left:right 拆成两个 if（更好读）
+  class Solution {
+      public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+          if (root == null || p == root || q == root) return root;  // 基准：空/找到目标
+          TreeNode left = lowestCommonAncestor(root.left, p, q);    // 左找
+          TreeNode right = lowestCommonAncestor(root.right, p, q);  // 右找
+          if (left != null && right != null) return root;  // ⭐ 分居两侧 → 自己是 LCA
+          if (right == null) return left;                  // 右边空 → 答案在左边，往上抛
+          return right;                                    // 左边空 → 答案在右边
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(h)
+- **掌握程度：** ✅（学员独立 AC，理解"左右都非空=分居两侧"）
+- **感悟/易错点：** ① ⭐ **核心推理：左右都非空 ⟺ p、q 各在一边**——如果 p、q 都挤在一侧，另一侧返回必为 null；所以走到"左右都非空"只剩"分居两侧"一种情况，当前节点就是唯一分叉点 = LCA；② "别扭感"解药：递归已经把"都挤一边"滤掉了；③ 🧠 记忆锚点：**LCA = 从下往上第一个分叉点**（两个人各自往上走，第一次碰面的节点）；④ 单边找到就 `return left/right` 往上抛（答案在那边）；⑤ 基准 `root==p || root==q` 直接返回——目标是祖先时，它自己就是答案；⑥ 和 543/101 同款"后序 + 返回值向上传"
 
 ### 7. 二叉树中的最大路径和（Hard）
 - **核心思路：**
