@@ -131,11 +131,50 @@ public int postorder(TreeNode node) {
 - **感悟/易错点：** ① 两版对比：**末尾接上版**要 while 走到底找链尾；**头插法版**不用找链尾（每次只插头部），用"访问顺序反过来"抵消"插在头部"；② 🧠 记忆锚点：**"右左根 + 头插 = 前序结果"**——先访问的（右子树）被挤到最后=前序末尾，根最后头插在最前=前序开头；③ 递归顺序（右左根）≠ 结果顺序（前序根左右），别绕晕；④ Java 没有指针，跨递归共享的 head 用**成员变量**；⑤ 头插法 = REV-28 链表高频套路（206 反转 / 25 组内反转 / 114 同款）
 
 ### 4. 从前序与中序遍历构造二叉树（Medium）
-- **核心思路：**
+- **核心思路：** **前序定根 + 中序切分**。前序第一个 = 根；在中序里找根的位置，左边 = 左子树节点、右边 = 右子树节点；左子树大小 = 根在中序的下标；递归建左右子树。两版：切数组版（直观，O(n) 空间）/ 区间法（传下标不拷贝，O(1) 空间，面试推荐）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员版：切数组版（理解透彻，能讲清每行）—— Arrays.copyOfRange [start,end) 左闭右开
+  class Solution {
+      public TreeNode buildTree(int[] preorder, int[] inorder) {
+          int n = preorder.length;
+          if (preorder.length == 0) return null;
+          TreeNode root = new TreeNode(preorder[0]);
+          int leftSize = indexOf(inorder, preorder[0]);       // 左子树大小 = 根在中序下标
+          int[] pre1 = Arrays.copyOfRange(preorder, 1, 1 + leftSize);  // 左子树前序
+          int[] pre2 = Arrays.copyOfRange(preorder, 1 + leftSize, n);  // 右子树前序
+          int[] in1  = Arrays.copyOfRange(inorder, 0, leftSize);       // 左子树中序
+          int[] in2  = Arrays.copyOfRange(inorder, leftSize + 1, n);   // 右子树中序
+          return new TreeNode(preorder[0], buildTree(pre1, in1), buildTree(pre2, in2));
+      }
+      private int indexOf(int[] a, int x) {
+          for (int i = 0; i < a.length; i++) if (a[i] == x) return i;
+          return -1;    // 保证 x 一定在 a 中；编译器要求所有路径有 return
+      }
+  }
+
+  // ⭐ 区间法（面试推荐）：HashMap 值→中序下标，传 4 个下标，不拷贝数组
+  class Solution {
+      Map<Integer, Integer> indexMap = new HashMap<>();
+      public TreeNode buildTree(int[] preorder, int[] inorder) {
+          for (int i = 0; i < inorder.length; i++) indexMap.put(inorder[i], i);
+          return build(preorder, inorder, 0, preorder.length-1, 0, inorder.length-1);
+      }
+      TreeNode build(int[] preorder, int[] inorder, int preL, int preR, int inL, int inR) {
+          if (preL > preR) return null;
+          int rootVal = preorder[preL];
+          TreeNode root = new TreeNode(rootVal);
+          int inIdx = indexMap.get(rootVal);         // HashMap O(1) 找根
+          int leftSize = inIdx - inL;                // 左子树大小
+          root.left = build(preorder, inorder, preL+1, preL+leftSize, inL, inIdx-1);
+          root.right = build(preorder, inorder, preL+leftSize+1, preR, inIdx+1, inR);
+          return root;
+      }
+  }
+  ```
+- **复杂度：** O(n)（每节点建一次，HashMap O(1) 找根）/ O(n)（递归栈 + 切数组 O(n) 空间）或 O(h)（区间法）
+- **掌握程度：** ✅（学员切数组版理解透彻，能讲清"中序根左边=左子树"；区间法已讲解）
+- **感悟/易错点：** ① ⭐ **两大铁律：前序定根（preorder[0] 是根）+ 中序切分（根左边=左子树、右边=右子树）**；② 左子树大小 = 根在中序的下标（下标从 0 起 = 左边元素个数）；③ 切数组用 `Arrays.copyOfRange(a, start, end)` 左闭右开 `[start,end)`；④ **为什么必须"前序+中序"或"后序+中序"**：前序/后序给"根"，中序给"左右分界"，缺一不可；单独前序不知道左右子树各几个节点；⑤ HashMap 存"值→中序下标"是加速套路（138/146/105 同款）；⑥ 和 108 的关系：108 是"有序数组转 BST"（中点当根），105 是"前中序构造"（前序当根+中序切分），都是"找根→划分→递归"构造类
 
 ### 5. 路径总和 III（Medium）
 - **核心思路：**
