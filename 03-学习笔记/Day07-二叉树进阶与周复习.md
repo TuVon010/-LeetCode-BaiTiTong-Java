@@ -39,11 +39,32 @@ public int postorder(TreeNode node) {
 ## 二、做题记录
 
 ### 1. BST 第 K 小的元素（Medium）
-- **核心思路：**
+- **核心思路：** BST 中序遍历 = 从小到大，**数到第 k 个访问的节点就是答案**。就是 98 的中序模板，把"检查递增"换成"数到 k 记答案"。计数器跨递归共享 → 用全局变量
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      int count = 0;    // ⭐ 全局计数器：所有递归共享
+      int result = 0;   // ⭐ 全局答案
+
+      public int kthSmallest(TreeNode root, int k) {
+          inorder(root, k);
+          return result;
+      }
+      void inorder(TreeNode root, int k) {
+          if (root == null) return;
+          inorder(root.left, k);        // 左
+          count++;                      // 中：数一个
+          if (count == k) {
+              result = root.val;        // ⭐ 数到第 k 个，记答案
+              return;
+          }
+          inorder(root.right, k);       // 右
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(h)（h = 树高）
+- **掌握程度：** ✅（学员先尝试传参版，修正后改用全局变量版 AC）
+- **感悟/易错点：** ① ⭐ **跨递归共享的计数器必须用全局变量**（成员字段），不能传参——Java 基本类型按值传递，每层递归是"复印件"，子调用改了自己那张，父调用不知道（543 同款教训：黑板 vs 草稿纸）；② `count` 记"访问到第几个"，`result` 记"答案"，两个全局，分工清晰；③ 直接孩子/返回值丢失：左子树找到答案要向上传，用全局 result 绕开；④ **230 = 98 中序模板 + 换中间 3 行**：98 检查递增，230 数到 k 记答案；⑤ 函数末尾必须有 return 或声明 void，别滑出函数（编译错误）
 
 ### 2. 二叉树的右视图（Medium）
 - **核心思路：**
