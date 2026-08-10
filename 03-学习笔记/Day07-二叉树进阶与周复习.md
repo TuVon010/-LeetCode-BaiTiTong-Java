@@ -177,11 +177,55 @@ public int postorder(TreeNode node) {
 - **感悟/易错点：** ① ⭐ **两大铁律：前序定根（preorder[0] 是根）+ 中序切分（根左边=左子树、右边=右子树）**；② 左子树大小 = 根在中序的下标（下标从 0 起 = 左边元素个数）；③ 切数组用 `Arrays.copyOfRange(a, start, end)` 左闭右开 `[start,end)`；④ **为什么必须"前序+中序"或"后序+中序"**：前序/后序给"根"，中序给"左右分界"，缺一不可；单独前序不知道左右子树各几个节点；⑤ HashMap 存"值→中序下标"是加速套路（138/146/105 同款）；⑥ 和 108 的关系：108 是"有序数组转 BST"（中点当根），105 是"前中序构造"（前序当根+中序切分），都是"找根→划分→递归"构造类
 
 ### 5. 路径总和 III（Medium）
-- **核心思路：**
+- **核心思路：** 暴力法 = 枚举每个起点往下数（O(n²)）；**前缀和 + 回溯法（O(n)）= 560 数组前缀和的树形版**——路径和 = 后代前缀 - 祖先前缀，找 `map[currSum - target]`。树 DFS 必须"用完要还"（回溯撤销）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 暴力法（学员独立写出，O(n²)）：每个节点当起点，dfs 往下数
+  class Solution {
+      private int result;
+      private int targetSum;
+      public int pathSum(TreeNode root, int targetSum) {
+          this.targetSum = targetSum;
+          this.result = 0;
+          traverseAllNodes(root);   // 枚举每个起点
+          return result;
+      }
+      private void traverseAllNodes(TreeNode node) {
+          if (node == null) return;
+          dfs(node, (long)node.val);        // 以 node 为起点往下数
+          traverseAllNodes(node.left);
+          traverseAllNodes(node.right);
+      }
+      private void dfs(TreeNode node, long currentSum) {
+          if (currentSum == targetSum) result++;
+          if (node.left != null) dfs(node.left, currentSum + node.left.val);
+          if (node.right != null) dfs(node.right, currentSum + node.right.val);
+      }
+  }
+
+  // ⭐ 前缀和 + 回溯法（O(n)，REV-29 重点复习）
+  class Solution {
+      int res = 0;
+      Map<Long, Integer> map = new HashMap<>();
+      public int pathSum(TreeNode root, int targetSum) {
+          map.put(0L, 1);                          // ⭐ 易错3：初始化前缀和0（代表"从根开始"）
+          dfs(root, 0L, targetSum);
+          return res;
+      }
+      void dfs(TreeNode root, long currSum, int targetSum) {
+          if (root == null) return;
+          currSum += root.val;
+          res += map.getOrDefault(currSum - targetSum, 0);  // ⭐ 易错1：先查后记
+          map.put(currSum, map.getOrDefault(currSum, 0) + 1);
+          dfs(root.left, currSum, targetSum);
+          dfs(root.right, currSum, targetSum);
+          map.put(currSum, map.get(currSum) - 1);  // ⭐ 易错2：回溯撤销"用完要还"
+      }
+  }
+  ```
+- **复杂度：** 暴力 O(n²) / 前缀和 O(n)；空间 O(h) + map
+- **掌握程度：** 🔄（暴力法独立 AC；前缀和+回溯 4 易错点需复习，登记 REV-29）
+- **感悟/易错点：** ① ⭐ **前缀和法 = 560 的树形版**：`路径和 = 后代前缀 - 祖先前缀`，查 `map[currSum - target]`；② ⭐ **易错1 先查后记**：先 `res += map.get(currSum-target)` 再 `map.put(currSum,...)`，反了会在 target=0 时把自己当"更早前缀"多算空路径；③ ⭐ **易错2 回溯撤销**：从孩子返回后 `map.put(currSum, map.get(currSum)-1)`——map 记录的是"当前路径上的前缀和"，换分支必须撤销，否则结果偏大；"借了要还"；④ ⭐ **易错3 初始化** `map.put(0L,1)`：让"从根到当前节点整条路径"能被查到；⑤ ⭐ **易错4 用 long**：前缀和可能超 int 范围；⑥ 暴力法思路（枚举起点）也是有效心智模型，先暴力再优化是正道
 
 ### 6. 二叉树的最近公共祖先（Medium）
 - **核心思路：**
