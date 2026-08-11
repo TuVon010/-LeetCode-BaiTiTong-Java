@@ -275,11 +275,40 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **难点 = 想到两个栈**：要 O(1) 取最值 + 可回退 → "再开一个栈记历史"（空间换时间）；② **记位置走不通**：min_location 指向的下标 pop 掉后无法 O(1) 找回下一个最小值，必须重扫 O(n)；③ 辅助栈存"每一步的最小值本身"，pop 一起弹自动还原；④ 类比：min_location 只记现任冠军，辅助栈是"每届冠军档案"；⑤ 通用套路：**主结构 + 辅助结构同步维护**（155 辅助栈 / 146 辅助双向链表 / 232 双栈队列）
 
 ### 7. 字符串解码（Medium）
-- **核心思路：**
+- **核心思路：** **双栈解嵌套**。数字栈存每层重复次数，字符串栈存每层之前拼好的字符串。`[` = 存档（压栈 + 重置），`]` = 读档解压（弹次数、弹之前字符串、重复拼回）。嵌套天然"内层先解压外层后解压" = 后进先出 = 栈（和 20 括号配对同源）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public String decodeString(String s) {
+          Deque<Integer> numStack = new ArrayDeque<>();
+          Deque<String> strStack = new ArrayDeque<>();
+          int num = 0;                              // 累积当前数字
+          StringBuilder cur = new StringBuilder();  // 累积当前段字符串（白板）
+          for (char c : s.toCharArray()) {
+              if (Character.isDigit(c)) {
+                  num = num * 10 + (c - '0');       // 字符数字 → 真数字 + 拼多位
+              } else if (c == '[') {
+                  numStack.push(num);                // 存档数字
+                  strStack.push(cur.toString());     // 存档字符串
+                  num = 0;                           // 重置，准备下一层
+                  cur = new StringBuilder();
+              } else if (c == ']') {
+                  int repeat = numStack.pop();       // 读档：重复次数
+                  String prev = strStack.pop();      // 读档：之前拼好的
+                  StringBuilder temp = new StringBuilder();
+                  for (int i = 0; i < repeat; i++) temp.append(cur);
+                  cur = new StringBuilder(prev).append(temp);   // prev + 重复结果
+              } else {
+                  cur.append(c);                     // 字母直接写白板
+              }
+          }
+          return cur.toString();
+      }
+  }
+  ```
+- **复杂度：** O(输出长度) / O(嵌套深度)
+- **掌握程度：** ✅（学员在框架下补齐 `]` 解压逻辑，理解双栈思想；暴露 StringBuilder/Character 语法短板已登记 REV-33）
+- **感悟/易错点：** ① ⭐ **`[` 存档、`]` 读档**：`[` 把当前数字和字符串压栈再重置，`]` 弹出重复次数和之前字符串重复拼回——嵌套 = 层层的存档/读档，内层先解压；② **StringBuilder** = 可变字符串"白板"，拼接多次用 `append` 而非 `+`（String 不可变，每次 + 新建对象很慢），最后 `toString()` 交卷；③ **`c - '0'`** = 字符数字转真数字（`'5'-'0'=5`），`num*10+digit` 拼多位数字（读 1 再读 2 → 12）；④ `Character.isDigit(c)` 判断是不是数字字符；⑤ 和 20 括号配对同源：左括号入栈右括号配对，只是这里入的是"数字+字符串"两样东西
 
 ---
 
