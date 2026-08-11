@@ -126,11 +126,41 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **多源 BFS = 所有起点先全部入队，再照常层序**（核心：同一条起跑线）；② `fresh > 0` 防空转（全烂后继续扩散会多算分钟）；③ `fresh == 0 ? minutes : -1`（有永远烂不到的橘子返回 -1）；④ 层序模板三件套：固定 size / poll / offer 邻居；⑤ **方向数组进阶**（`di/dj` + for 循环代替 4 个 if）：`int[] di={-1,1,0,0}; int[] dj={0,0,-1,1}`，200/994/79/130 通用，改数组即可换方向
 
 ### 3. 课程表（Medium）
-- **核心思路：**
+- **核心思路：** **拓扑排序（Kahn 算法 / BFS 版）判断图有没有环**。能学完全部课 = 无环；有环（先有鸡还是先有蛋）学不完。核心：①统计每门课入度（前置数）②入度为 0 的课先学（入队/入栈）③弹出后把它解锁的课入度 -1，归零的课入队 ④总共学到的课数 == numCourses ⟺ 无环
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  // ⭐ 学员初版（扫 prerequisites，O(n·m)）+ 标准写法（邻接表，O(n+m)）
+  public boolean canFinish(int numCourses, int[][] prerequisites) {
+      int[] indegree = new int[numCourses];
+      Deque<Integer> s = new ArrayDeque<>();
+      for (int[] p : prerequisites) indegree[p[0]]++;        // 统计入度（前置数）
+      for (int i = 0; i < numCourses; i++) if (indegree[i] == 0) s.push(i);  // 无前置先学
+      int cnt = 0;
+      while (!s.isEmpty()) {
+          int p = s.pop();                                    // ⭐ pop 不是 pull
+          cnt++;
+          for (int[] pre : prerequisites) {
+              if (pre[1] == p) {                             // p 是这门课的前置
+                  indegree[pre[0]]--;
+                  if (indegree[pre[0]] == 0) s.push(pre[0]); // ⭐ 归零才入栈（否则重复入栈死循环）
+              }
+          }
+      }
+      return cnt == numCourses;
+  }
+
+  // ⭐ 标准写法（邻接表，面试推荐，210 姐妹题直接复用）
+  List<List<Integer>> graph = new ArrayList<>();
+  for (int i = 0; i < numCourses; i++) graph.add(new ArrayList<>());  // 先备好 n 张空纸条
+  for (int[] p : prerequisites) {
+      graph.get(p[1]).add(p[0]);   // p[1] 学完 → 解锁 p[0]（get 取抽屉，add 写名字）
+      indegree[p[0]]++;
+  }
+  // BFS 里：for (int next : graph.get(cur)) { indegree[next]--; if (indegree[next]==0) q.offer(next); }
+  ```
+- **复杂度：** 扫 prerequisites 版 O(n·m) / 邻接表版 O(n+m)；空间 O(n+m)
+- **掌握程度：** ✅（学员理解 Kahn 算法，自己修正 pull→pop 和"归零才入栈"两个 bug）
+- **感悟/易错点：** ① ⭐ **Kahn 判环 = 学到的课数 == 总数**（有环 → 剩余课永远没法学）；② ⭐ **"归零才入栈"**：入度减 1 后只有恰好归零才入队，否则重复入队死循环；③ `pop` 不是 `pull`（Deque 栈操作 push/pop）；④ **邻接表 vs 邻接矩阵**：邻接表 = 每人一张"朋友名单"（List<List<Integer>>，n 个抽屉各装一张纸条），`graph.get(a).add(b)` = 打开 a 的抽屉写 b；邻接矩阵 = `boolean[n][n]` 表格；稀疏图用表，稠密图用矩阵；⑤ 邻接表建图时**必须先 add 空 List 初始化**，否则 get 到 null 空指针；⑥ 拓扑排序是有向图判环的通用工具（207/210/可能 310）
 
 ### 4. 实现 Trie（Medium）
 - **核心思路：**
