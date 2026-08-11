@@ -243,11 +243,36 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **switch 缺 break 会穿透**（ERR-020）：case 执行完没 break 会滑到下一个 case，合法输入被误判（`"()"` 穿透到 `]` 又 pop 空栈 → false）；口诀"case 带把锁（break），不锁滑到下一家"；② ⭐ **pop 前先问 isEmpty**：空栈 pop 抛 NoSuchElementException 崩溃，且空栈遇右括号本就该 false（短路：`isEmpty() || pop() != x`）；③ **Map 版更推荐**（避免 switch 的坑）：`Map.of(')','(',']','[','}','{')` + `if (stack.isEmpty() || stack.pop() != map.get(c)) return false;`；④ 左括号三兄弟可"叠 case"共享代码；⑤ `return stack.isEmpty()` 代替 `if(!isEmpty) return false; return true;`；⑥ 🧠 **栈操作三连问（REV-33 补强）**：写 `pop()` 前问"空吗？"、写 `peek()` 前问"空吗？"、`push()` 永不崩不用问
 
 ### 6. 最小栈（Medium）
-- **核心思路：**
+- **核心思路：** **辅助栈同步记录"每一步的最小值"**。数据栈 stack 存数据，辅助栈 minStack 存每一步的当前最小值（`Math.min(minStack.peek(), val)`）。pop 时两栈一起弹 → minStack 顶自动回到上一个最小值，O(1)。**难点就是"想到要创建两个栈"**——记位置的思路走不通（pop 后无法 O(1) 找回上一个最小值），辅助栈保存了历史最小值档案
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class MinStack {
+      Deque<Integer> stack;
+      Deque<Integer> minStack;
+      public MinStack() {
+          stack = new ArrayDeque<>();
+          minStack = new ArrayDeque<>();
+      }
+      public void push(int val) {
+          stack.push(val);
+          int min = minStack.isEmpty() ? val : Math.min(minStack.peek(), val);
+          minStack.push(min);   // ⭐ 每一步都记下当前最小值
+      }
+      public void pop() {
+          stack.pop();
+          minStack.pop();       // ⭐ 两栈一起弹，自动回到上一个最小值
+      }
+      public int top() {
+          return stack.peek();
+      }
+      public int getMin() {
+          return minStack.peek();   // 辅助栈顶 = 当前最小
+      }
+  }
+  ```
+- **复杂度：** 全部 O(1)；空间 O(n)（辅助栈）
+- **掌握程度：** ✅（学员理解辅助栈思想，独立写出 AC；学员先试"记位置"思路，被 pop 失效点卡住后悟到辅助栈）
+- **感悟/易错点：** ① ⭐ **难点 = 想到两个栈**：要 O(1) 取最值 + 可回退 → "再开一个栈记历史"（空间换时间）；② **记位置走不通**：min_location 指向的下标 pop 掉后无法 O(1) 找回下一个最小值，必须重扫 O(n)；③ 辅助栈存"每一步的最小值本身"，pop 一起弹自动还原；④ 类比：min_location 只记现任冠军，辅助栈是"每届冠军档案"；⑤ 通用套路：**主结构 + 辅助结构同步维护**（155 辅助栈 / 146 辅助双向链表 / 232 双栈队列）
 
 ### 7. 字符串解码（Medium）
 - **核心思路：**
