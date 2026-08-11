@@ -239,8 +239,8 @@ while (!q.isEmpty()) {
   }
   ```
 - **复杂度：** O(n) / O(n)
-- **掌握程度：** ✅（学员从"switch 不会用"到独立修好 break + isEmpty 两个坑）
-- **感悟/易错点：** ① ⭐ **switch 缺 break 会穿透**（ERR-020）：case 执行完没 break 会滑到下一个 case，合法输入被误判（`"()"` 穿透到 `]` 又 pop 空栈 → false）；口诀"case 带把锁（break），不锁滑到下一家"；② ⭐ **pop 前先问 isEmpty**：空栈 pop 抛 NoSuchElementException 崩溃，且空栈遇右括号本就该 false（短路：`isEmpty() || pop() != x`）；③ 左括号三兄弟可"叠 case"共享代码；④ `return stack.isEmpty()` 代替 `if(!isEmpty) return false; return true;`
+- **掌握程度：** ✅（学员从"switch 不会用"到独立修好 break + isEmpty 两个坑，还写出了更优的 Map 版）
+- **感悟/易错点：** ① ⭐ **switch 缺 break 会穿透**（ERR-020）：case 执行完没 break 会滑到下一个 case，合法输入被误判（`"()"` 穿透到 `]` 又 pop 空栈 → false）；口诀"case 带把锁（break），不锁滑到下一家"；② ⭐ **pop 前先问 isEmpty**：空栈 pop 抛 NoSuchElementException 崩溃，且空栈遇右括号本就该 false（短路：`isEmpty() || pop() != x`）；③ **Map 版更推荐**（避免 switch 的坑）：`Map.of(')','(',']','[','}','{')` + `if (stack.isEmpty() || stack.pop() != map.get(c)) return false;`；④ 左括号三兄弟可"叠 case"共享代码；⑤ `return stack.isEmpty()` 代替 `if(!isEmpty) return false; return true;`；⑥ 🧠 **栈操作三连问（REV-33 补强）**：写 `pop()` 前问"空吗？"、写 `peek()` 前问"空吗？"、`push()` 永不崩不用问
 
 ### 6. 最小栈（Medium）
 - **核心思路：**
