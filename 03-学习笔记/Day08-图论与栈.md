@@ -210,11 +210,37 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **search vs startsWith 就差一行**：search 要 `node.isEnd`（完整单词），startsWith 只要走到（前缀存在）；② **数组默认值**：`new TrieNode[26]` 给 26 个格子，引用默认 null（"26 格信箱架，格子空着"），所以访问前要 `if (== null)`；③ `idx = c - 'a'`：字符转 0~25 下标（'a'→0）；④ `toCharArray()`：String → char[]，for-each 逐字符；⑤ **节点不存字符**，靠 children 下标定位；⑥ Trie 优势：查前缀 O(长度) 与字典大小无关，自动补全/拼写检查/IP 路由的基础
 
 ### 5. 有效的括号（Easy）
-- **核心思路：**
+- **核心思路：** 栈的经典应用。左括号入栈，右括号和栈顶配对：栈顶匹配则弹出，不匹配或栈空则 false；遍历完栈必须为空。**后进先出 = 最近配对的括号在栈顶**（叠盘子，最后放的先拿）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public boolean isValid(String s) {
+          Deque<Character> stack = new ArrayDeque<>();
+          for (char c : s.toCharArray()) {
+              switch (c) {
+                  case '(': case '[': case '{':   // 左括号三兄弟共用一段（叠 case）
+                      stack.push(c);
+                      break;
+                  case ')':
+                      if (stack.isEmpty() || stack.pop() != '(') return false;
+                      break;                      // ⭐ 每个 case 都要 break，否则穿透（ERR-020）
+                  case ']':
+                      if (stack.isEmpty() || stack.pop() != '[') return false;
+                      break;
+                  case '}':
+                      if (stack.isEmpty() || stack.pop() != '{') return false;
+                      break;
+                  default:
+                      break;
+              }
+          }
+          return stack.isEmpty();   // 栈空 = 全配上
+      }
+  }
+  ```
+- **复杂度：** O(n) / O(n)
+- **掌握程度：** ✅（学员从"switch 不会用"到独立修好 break + isEmpty 两个坑）
+- **感悟/易错点：** ① ⭐ **switch 缺 break 会穿透**（ERR-020）：case 执行完没 break 会滑到下一个 case，合法输入被误判（`"()"` 穿透到 `]` 又 pop 空栈 → false）；口诀"case 带把锁（break），不锁滑到下一家"；② ⭐ **pop 前先问 isEmpty**：空栈 pop 抛 NoSuchElementException 崩溃，且空栈遇右括号本就该 false（短路：`isEmpty() || pop() != x`）；③ 左括号三兄弟可"叠 case"共享代码；④ `return stack.isEmpty()` 代替 `if(!isEmpty) return false; return true;`
 
 ### 6. 最小栈（Medium）
 - **核心思路：**
