@@ -91,11 +91,39 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **沉岛 = visited**：遍历过的节点必须标记，否则回头路把答案数重（图论通用规律，二叉树天然分左右不用标记，网格要）；② **刹车条件一个都不能少**：越界（上下左右四个） + 不是 '1'，漏一个就栈溢出或重复；③ **网格 DFS = 二叉树递归四方向版**：同一个骨架，二叉树 `node.left/right` → 网格 `(i±1,j)/(i,j±1)`；④ 主函数双重循环逐个格子找起点
 
 ### 2. 腐烂的橘子（Medium）
-- **核心思路：**
+- **核心思路：** **多源 BFS**。所有烂橘子（2）第 0 分钟同时入队，一层层向外扩散（每层 = 1 分钟）。准备阶段数好新鲜橘子 fresh；扩散时邻居是 1 → 变 2、fresh--、入队。**关键是"多源"**：所有起点站在第 0 分钟同一条起跑线，只从一个起点开始会算错分钟（其他烂橘第 0 分钟的传染被算成更晚）。`while (!q.isEmpty() && fresh > 0)` 防空转；`fresh == 0 ? minutes : -1` 兜底有烂不到的新鲜橘子
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public int orangesRotting(int[][] grid) {
+          Deque<int[]> q = new ArrayDeque<>();
+          int fresh = 0;
+          for (int i = 0; i < grid.length; i++)
+              for (int j = 0; j < grid[0].length; j++) {
+                  if (grid[i][j] == 1) fresh++;
+                  if (grid[i][j] == 2) q.offer(new int[]{i, j});   // 所有起点入队（多源）
+              }
+          int minutes = 0;
+          while (!q.isEmpty() && fresh > 0) {   // ⭐ 还有新鲜橘子才继续（防空转）
+              minutes++;
+              int size = q.size();              // ⭐ 固定本层人数（层序模板）
+              for (int k = 0; k < size; k++) {
+                  int[] cur = q.poll();
+                  int i = cur[0], j = cur[1];
+                  // 四方向：邻居是 1 → 变 2、fresh--、入队（学员写的 4 个 if，可改方向数组）
+                  if (i - 1 >= 0 && grid[i - 1][j] == 1) { grid[i - 1][j] = 2; fresh--; q.offer(new int[]{i - 1, j}); }
+                  if (i + 1 < grid.length && grid[i + 1][j] == 1) { grid[i + 1][j] = 2; fresh--; q.offer(new int[]{i + 1, j}); }
+                  if (j - 1 >= 0 && grid[i][j - 1] == 1) { grid[i][j - 1] = 2; fresh--; q.offer(new int[]{i, j - 1}); }
+                  if (j + 1 < grid[0].length && grid[i][j + 1] == 1) { grid[i][j + 1] = 2; fresh--; q.offer(new int[]{i, j + 1}); }
+              }
+          }
+          return fresh == 0 ? minutes : -1;
+      }
+  }
+  ```
+- **复杂度：** O(m·n) / O(m·n)（队列最大存所有格子）
+- **掌握程度：** ✅（学员在思路框架下独立写出四方向扩散，能讲清"多源 = 所有起点同时传染"）
+- **感悟/易错点：** ① ⭐ **多源 BFS = 所有起点先全部入队，再照常层序**（核心：同一条起跑线）；② `fresh > 0` 防空转（全烂后继续扩散会多算分钟）；③ `fresh == 0 ? minutes : -1`（有永远烂不到的橘子返回 -1）；④ 层序模板三件套：固定 size / poll / offer 邻居；⑤ **方向数组进阶**（`di/dj` + for 循环代替 4 个 if）：`int[] di={-1,1,0,0}; int[] dj={0,0,-1,1}`，200/994/79/130 通用，改数组即可换方向
 
 ### 3. 课程表（Medium）
 - **核心思路：**
