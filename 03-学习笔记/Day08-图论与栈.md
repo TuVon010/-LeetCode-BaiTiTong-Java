@@ -163,11 +163,51 @@ while (!q.isEmpty()) {
 - **感悟/易错点：** ① ⭐ **Kahn 判环 = 学到的课数 == 总数**（有环 → 剩余课永远没法学）；② ⭐ **"归零才入栈"**：入度减 1 后只有恰好归零才入队，否则重复入队死循环；③ `pop` 不是 `pull`（Deque 栈操作 push/pop）；④ **邻接表 vs 邻接矩阵**：邻接表 = 每人一张"朋友名单"（List<List<Integer>>，n 个抽屉各装一张纸条），`graph.get(a).add(b)` = 打开 a 的抽屉写 b；邻接矩阵 = `boolean[n][n]` 表格；稀疏图用表，稠密图用矩阵；⑤ 邻接表建图时**必须先 add 空 List 初始化**，否则 get 到 null 空指针；⑥ 拓扑排序是有向图判环的通用工具（207/210/可能 310）
 
 ### 4. 实现 Trie（Medium）
-- **核心思路：**
+- **核心思路：** **前缀树（Trie）**，专治字符串前缀匹配。每个节点 = `children[26]`（a~z 各一个孩子）+ `isEnd`（是不是某单词结尾）。核心操作全是"沿树走"：insert 没路就建、走到底打 isEnd；search 要走到 + isEnd；startsWith 只要走到。**节点不存字符**——是什么字母由"爸爸的 children 下标"决定（门牌号写在门框上，不写在门里）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Trie {
+      class TrieNode {
+          TrieNode[] children = new TrieNode[26];  // 26 格信箱架，格子默认 null（空）
+          boolean isEnd;
+      }
+      TrieNode root;
+      public Trie() { root = new TrieNode(); }
+
+      public void insert(String word) {
+          TrieNode node = root;
+          for (char c : word.toCharArray()) {
+              int idx = c - 'a';
+              if (node.children[idx] == null) node.children[idx] = new TrieNode();  // 格子空就放信
+              node = node.children[idx];   // 往下走
+          }
+          node.isEnd = true;   // 走到底打结尾标记
+      }
+
+      public boolean search(String word) {
+          TrieNode node = root;
+          for (char c : word.toCharArray()) {
+              int idx = c - 'a';
+              if (node.children[idx] == null) return false;  // 走不通 → 前缀不存在
+              node = node.children[idx];
+          }
+          return node.isEnd;   // ⭐ search 要踩在单词终点上
+      }
+
+      public boolean startsWith(String prefix) {
+          TrieNode node = root;
+          for (char c : prefix.toCharArray()) {
+              int idx = c - 'a';
+              if (node.children[idx] == null) return false;
+              node = node.children[idx];
+          }
+          return true;   // ⭐ startsWith 只要路走得通
+      }
+  }
+  ```
+- **复杂度：** insert/search/startsWith 均 O(单词长度)；空间 O(总字符数 × 26)
+- **掌握程度：** ✅（学员独立写出全部 4 个方法，注释清晰，理解 search 与 startsWith 就差 isEnd 一行）
+- **感悟/易错点：** ① ⭐ **search vs startsWith 就差一行**：search 要 `node.isEnd`（完整单词），startsWith 只要走到（前缀存在）；② **数组默认值**：`new TrieNode[26]` 给 26 个格子，引用默认 null（"26 格信箱架，格子空着"），所以访问前要 `if (== null)`；③ `idx = c - 'a'`：字符转 0~25 下标（'a'→0）；④ `toCharArray()`：String → char[]，for-each 逐字符；⑤ **节点不存字符**，靠 children 下标定位；⑥ Trie 优势：查前缀 O(长度) 与字典大小无关，自动补全/拼写检查/IP 路由的基础
 
 ### 5. 有效的括号（Easy）
 - **核心思路：**
