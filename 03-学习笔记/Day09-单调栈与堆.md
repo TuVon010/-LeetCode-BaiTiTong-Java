@@ -71,43 +71,80 @@ maxHeap.offer(val);
 
 ### 2. 柱状图中最大的矩形（Hard）
 - **核心思路：** 每根柱子轮流当"天花板"（矩形的高 = 内部最矮那根），往左右延伸到第一个比自己矮的柱子为止。优化：单调**递增**栈，一次算出所有柱子的左右边界。
-- **代码实现（暴力版 O(n²)，已 AC）：**
+- **代码实现（单调栈两遍版 O(n)，已 AC）：**
   ```java
   class Solution {
       public int largestRectangleArea(int[] heights) {
-          int len = heights.length;
-          if (len == 0) return 0;
+          int n = heights.length;
+          int[] left = new int[n], right = new int[n];
+          Deque<Integer> stack = new ArrayDeque<>();
+
+          for (int i = 0; i < n; i++) {
+              while (!stack.isEmpty() && heights[stack.peek()] >= heights[i]) stack.pop();
+              left[i] = stack.isEmpty() ? -1 : stack.peek();
+              stack.push(i);
+          }
+          stack.clear();
+          for (int i = n - 1; i >= 0; i--) {
+              while (!stack.isEmpty() && heights[stack.peek()] >= heights[i]) stack.pop();
+              right[i] = stack.isEmpty() ? n : stack.peek();
+              stack.push(i);
+          }
           int res = 0;
-          for (int i = 0; i < len; i++) {
-              int left = i;
-              int curHeight = heights[i];
-              while (left > 0 && heights[left - 1] >= curHeight) left--;
-              int right = i;
-              while (right < len - 1 && heights[right + 1] >= curHeight) right++;
-              int width = right - left + 1;
-              res = Math.max(res, width * curHeight);
+          for (int i = 0; i < n; i++) {
+              res = Math.max(res, heights[i] * (right[i] - left[i] - 1));
           }
           return res;
       }
   }
   ```
 - **复杂度：** 暴力 O(n²) / O(1)；单调栈 O(n) / O(n)
-- **掌握程度：** ⏳ 进行中（暴力已 AC，单调栈左边界模板已给，待完成 right[] + 面积）
-- **感悟/易错点：** "延伸"= 天花板高度固定的前提下能罩多宽，到第一根更矮的柱子就得停（短板效应）；单调栈弹掉的是**比新来的矮或相等**的柱子（`>=` 弹掉相等的防挡路）
+- **掌握程度：** 🟡（left[] 模板我给，right[] 对称套用 + 主动质疑 `>=`；还独立把 C++ 单遍版转成 Java）
+- **感悟/易错点：**
+  - "天花板"思想：矩形高 = 内部最矮柱；每根柱子往左右延伸到**第一个更矮**的为止
+  - `>=` 弹掉相等的（两遍版）：相等柱子是"共同体"，不互相挡路才能合并成大矩形；单遍版用 `<` 靠"早期柱子往右兜底"同样算对
+  - 面积公式：`heights[i] * (right[i] - left[i] - 1)`，左界没有 -1，右界没有 n
+  - ⚠️ Java 数组默认 0，left 要 `Arrays.fill(left,-1)`、right 要 `Arrays.fill(right,n)`（C++ `vector(n,-1)` 转 Java 的坑，REV-38）
 
 ### 3. 数组中的第 K 个最大元素（Medium）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+- **核心思路：** 三解法：①排序 `Arrays.sort` + `nums[n-k]`（O(n log n)）②小根堆守 k 个（O(n log k)，堆顶=第k大守门员）③快速选择 quickSelect（O(n) 平均，快排只排一边）
+- **代码实现（堆版）：**
+  ```java
+  public int findKthLargest(int[] nums, int k) {
+      PriorityQueue<Integer> heap = new PriorityQueue<>();   // 小根堆
+      for (int num : nums) {
+          heap.offer(num);
+          if (heap.size() > k) heap.poll();    // 堆超过 k 个，踢掉最小的
+      }
+      return heap.peek();                      // 堆顶 = 第 k 大
+  }
+  ```
+- **复杂度：** 排序 O(n log n) / O(1)；堆 O(n log k) / O(k)；quickSelect 平均 O(n) / O(log n)
+- **掌握程度：** 🟡（排序版✅独立；堆版🟡骨架；quickSelect🟡理解）
+- **感悟/易错点：** 小根堆守 k 个 = "前 k 名榜单"，堆顶是守门员（最弱的）；quickSelect 三步：随机 pivot → 分 big/equal/small → 第 k 大在哪个区就递归哪个区（快排只排一边）；情况2新 k = k - (big+equal)
 
 ### 4. 前 K 个高频元素（Medium）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+- **核心思路：** ①HashMap 数频率 → 小根堆守 k 个（按频率比）②桶排序 O(n)：`buckets[频率] = 数字列表`，从高到低收集
+- **代码实现（堆版）：**
+  ```java
+  public int[] topKFrequent(int[] nums, int k) {
+      Map<Integer, Integer> freq = new HashMap<>();
+      for (int num : nums) {
+          freq.put(num, freq.getOrDefault(num, 0) + 1);
+      }
+      PriorityQueue<int[]> heap = new PriorityQueue<>((a, b) -> a[1] - b[1]);  // 按频率的小根堆
+      for (Map.Entry<Integer, Integer> e : freq.entrySet()) {
+          heap.offer(new int[]{e.getKey(), e.getValue()});
+          if (heap.size() > k) heap.poll();
+      }
+      int[] res = new int[k];
+      for (int i = 0; i < k; i++) res[i] = heap.poll()[0];
+      return res;
+  }
+  ```
+- **复杂度：** 堆 O(n log k) / O(n)；桶 O(n) / O(n)
+- **掌握程度：** 🟡（Step1 HashMap 自己写对，堆部分骨架填空；桶排序 🟡 理解）
+- **感悟/易错点：** 堆里存 `int[]{数字,频率}`，比较器按频率 `a[1]-b[1]`；桶排序"频率当下标"= O(n) 关键，前提频率是有界整数；新语法 `merge`/`Collections.max`/`Arrays.setAll`（REV-41）
 
 ### 5. 数据流的中位数（Hard）
 - **核心思路：**
