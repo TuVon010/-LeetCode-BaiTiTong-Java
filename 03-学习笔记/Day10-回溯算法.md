@@ -258,12 +258,47 @@ for (int i = 0; i < nums.length; i++) {
 - **掌握程度：** 🟡 提示下完成，待独立默写
 - **感悟/易错点：** `substring(start, i+1)` 左闭右开；撤销的真正作用（start 不动，i 递增，前缀变长）；回文双指针
 
-### 8. N 皇后（Hard）
-- **核心思路：**
-- **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+### 8. N 皇后（Hard）→ LeetCode 51
+- **核心思路：** 逐行放皇后（一行一个 → 天然免同行冲突）；防三样：列 + 主对角线 + 副对角线。两种实现：①isValid 版（向上扫描列/两对角线，直观 O(n)）②boolean 数组版（列 `col[j]`、主对角线 `diagMain[i-j+n-1]`、副对角线 `diagSub[i+j]`，O(1) 查重）
+- **代码实现：**（boolean 数组版，理解优先）
+  ```java
+  class Solution {
+      List<List<String>> res = new ArrayList<>();
+      char[][] board;
+      boolean[] col, diagMain, diagSub;
+
+      public List<List<String>> solveNQueens(int n) {
+          board = new char[n][n];
+          for (char[] row : board) Arrays.fill(row, '.');
+          // 主对角线（\）：i-j 恒定，但范围 -(n-1)~n-1 有负数 → 平移 +n-1
+          // 副对角线（/）：i+j 恒定，范围 0~2n-2 非负 → 不用平移
+          col = new boolean[n];
+          diagMain = new boolean[2 * n - 1];
+          diagSub = new boolean[2 * n - 1];
+          backtrack(n, 0);
+          return res;
+      }
+      void backtrack(int n, int row) {
+          if (row == n) {
+              List<String> list = new ArrayList<>();
+              for (char[] r : board) list.add(new String(r));
+              res.add(list);
+              return;
+          }
+          for (int j = 0; j < n; j++) {
+              if (col[j] || diagMain[row - j + n - 1] || diagSub[row + j]) continue;
+              board[row][j] = 'Q'; col[j] = true;
+              diagMain[row - j + n - 1] = true; diagSub[row + j] = true;
+              backtrack(n, row + 1);
+              board[row][j] = '.'; col[j] = false;
+              diagMain[row - j + n - 1] = false; diagSub[row + j] = false;
+          }
+      }
+  }
+  ```
+- **复杂度：** O(n!) / O(n)
+- **掌握程度：** 🔄 看过答案，待默写
+- **感悟/易错点：** ⭐ 对角线判定 = 直线方程：主对角 `i-j` 恒定（y=x+k，有负要平移 +n-1）、副对角 `i+j` 恒定（y=-x+k，天然非负）；回溯三件套：放Q → 下一行 → 拿走Q；isValid 版 vs boolean 数组版（直观 vs O(1)）
 
 ---
 
