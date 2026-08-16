@@ -134,26 +134,99 @@ for (int i = 0; i < nums.length; i++) {
 - **掌握程度：** 🟡 提示下完成，待独立默写
 - **感悟/易错点：** ERR-022 语法连锁（map.[index] 多点 / 逗号应 && / String 无 List 构造器 / StringBuilder 用 length() 不是 size() / 变量要传参 / 空串先挡门）；ERR-023 `map[digits.charAt(index)-'0']` 取抽屉（位置 index ≠ 数字键）
 
-### 4. 组合总和（Medium）
-- **核心思路：**
+### 4. 组合总和（Medium）→ LeetCode 39
+- **核心思路：** 同一个数可重复选 → 递归传 `i`（不是 `i+1`）；剪枝 `sum>target` return；收集 `sum==target`；`start` 锁死左边防重复（选 3 后下标 0 的 2 进不了分支 → 无 [3,2,2]）
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      List<List<Integer>> res = new ArrayList<>();
+      List<Integer> path = new ArrayList<>();
+      int sum = 0;   // 字段版：跨层共享，撤销要 sum-=candidates[i]
+      public List<List<Integer>> combinationSum(int[] candidates, int target) {
+          backtracking(candidates, target, 0);
+          return res;
+      }
+      void backtracking(int[] candidates, int target, int start) {
+          if (sum == target) { res.add(new ArrayList<>(path)); return; }
+          if (sum > target) return;
+          for (int i = start; i < candidates.length; i++) {
+              sum += candidates[i];
+              path.add(candidates[i]);
+              backtracking(candidates, target, i);   // ⭐ 传 i 可重复
+              sum -= candidates[i];
+              path.remove(path.size() - 1);
+          }
+      }
+  }
+  ```
+- **复杂度：** O(2ⁿ·n) / O(n)
+- **掌握程度：** 🟡 提示下完成，待独立默写
+- **感悟/易错点：** "传 i 实现可重复"是关键（REV-47）；sum 字段版 vs 参数版（REV-49）；防重复靠 start 锁左边
 
-### 5. 括号生成（Medium）
-- **核心思路：**
+### 5. 括号生成（Medium）→ LeetCode 22
+- **核心思路：** 不用 for（只有 2 选项且条件不同：放 `(` 要 `left<n`、放 `)` 要 `right<left` → 用 if 分支）；不用 start/used（无集合可选，两个计数器保证合法）；终止 `left==n&&right==n` 收集；`n==0` 空串保护
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      int left = 0, right = 0;
+      List<String> res = new ArrayList<>();
+      StringBuilder path = new StringBuilder();
+      public List<String> generateParenthesis(int n) {
+          if (n == 0) return res;   // ⭐ 空串保护
+          backtracking(n);
+          return res;
+      }
+      void backtracking(int n) {
+          if (left == n && right == n) { res.add(path.toString()); return; }
+          if (left < n) {
+              path.append('('); left++;
+              backtracking(n);
+              path.deleteCharAt(path.length() - 1);   // ⭐ 下标不是字符（ERR-024）
+              left--;
+          }
+          if (right < left) {
+              path.append(')'); right++;
+              backtracking(n);
+              right--;
+              path.deleteCharAt(path.length() - 1);
+          }
+      }
+  }
+  ```
+- **复杂度：** O(4ⁿ/√n) / O(n)
+- **掌握程度：** 🟡 提示下完成，待独立默写
+- **感悟/易错点：** 为什么不用 for / 不用 start / 参数版 vs 字段版（REV-49）；`deleteCharAt(length-1)` 不是字符（ERR-024）
 
-### 6. 单词搜索（Medium）
-- **核心思路：**
+### 6. 单词搜索（Medium）→ LeetCode 79
+- **核心思路：** 两层结构：exist 满地图找入口（两层 for + 匹配 word[0]）→ dfs 从入口四方向扩展；沉岛法标记（`board[i][j]='0'` 表示用过，word 只有字母不会撞）；撤销改回原字符；两个基准：越界/不匹配 → false、k==s.length()-1 匹配完 → true
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      public boolean exist(char[][] board, String word) {
+          for (int row = 0; row < board.length; row++)
+              for (int col = 0; col < board[0].length; col++)
+                  if (dfs(board, word, row, col, 0)) return true;
+          return false;
+      }
+      boolean dfs(char[][] b, String s, int row, int col, int k) {
+          if (row < 0 || row >= b.length || col < 0 || col >= b[0].length || b[row][col] != s.charAt(k))
+              return false;   // ⭐ >= 不是 >（ERR-025）
+          if (k == s.length() - 1) return true;   // ⭐ 匹配完最后一个直接成功
+          char c = b[row][col];
+          b[row][col] = '0';   // 沉岛法标记
+          // 短路版：找到一个方向 true 就停
+          if (dfs(b, s, row - 1, col, k + 1)) return true;
+          if (dfs(b, s, row + 1, col, k + 1)) return true;
+          if (dfs(b, s, row, col - 1, k + 1)) return true;
+          if (dfs(b, s, row, col + 1, k + 1)) return true;
+          b[row][col] = c;   // ⭐ 撤销：共享对象必须复原
+          return false;
+      }
+  }
+  ```
+- **复杂度：** O(m·n·4^L) / O(L)（L 单词长度）
+- **掌握程度：** 🟡 提示下完成，待独立默写
+- **感悟/易错点：** 两函数拆分（exist 找入口 / dfs 深搜）；边界 `>=`（ERR-025）；参数不用复原但共享对象必须复原（REV-49）；沉岛法标记安全（word 只含字母）
 
 ### 7. 分割回文串（Medium）
 - **核心思路：**
