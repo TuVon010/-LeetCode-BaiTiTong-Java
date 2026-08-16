@@ -228,12 +228,35 @@ for (int i = 0; i < nums.length; i++) {
 - **掌握程度：** 🟡 提示下完成，待独立默写
 - **感悟/易错点：** 两函数拆分（exist 找入口 / dfs 深搜）；边界 `>=`（ERR-025）；参数不用复原但共享对象必须复原（REV-49）；沉岛法标记安全（word 只含字母）
 
-### 7. 分割回文串（Medium）
-- **核心思路：**
+### 7. 分割回文串（Medium）→ LeetCode 131
+- **核心思路：** 78 子集 start 套路套皮；`start` 锁定起点，从 `start` 往后枚举终点 `i`，`s[start..i]` 是回文就切下递归 `i+1`；终止 `start==s.length()` 收集
 - **代码实现：**
-- **复杂度：** O(__) / O(__)
-- **掌握程度：** ✅ 🔄 ❌
-- **感悟/易错点：**
+  ```java
+  class Solution {
+      List<List<String>> res = new ArrayList<>();
+      List<String> path = new ArrayList<>();
+      public List<List<String>> partition(String s) {
+          dfs(s, 0);
+          return res;
+      }
+      void dfs(String s, int start) {
+          if (start == s.length()) { res.add(new ArrayList<>(path)); return; }
+          for (int i = start; i < s.length(); i++) {
+              if (!isPalindrome(s, start, i)) continue;
+              path.add(s.substring(start, i + 1));   // 左闭右开，endIndex 要 +1
+              dfs(s, i + 1);
+              path.remove(path.size() - 1);   // 撤销 = 腾位让同一 start 枚举更长前缀
+          }
+      }
+      boolean isPalindrome(String s, int l, int r) {
+          while (l < r) if (s.charAt(l++) != s.charAt(r--)) return false;
+          return true;
+      }
+  }
+  ```
+- **复杂度：** O(n·2ⁿ) / O(n)
+- **掌握程度：** 🟡 提示下完成，待独立默写
+- **感悟/易错点：** `substring(start, i+1)` 左闭右开；撤销的真正作用（start 不动，i 递增，前缀变长）；回文双指针
 
 ### 8. N 皇后（Hard）
 - **核心思路：**
