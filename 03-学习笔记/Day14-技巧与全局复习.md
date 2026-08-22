@@ -37,13 +37,16 @@ return candidate;
 ### 荷兰国旗（三指针）
 ```java
 int p0 = 0, cur = 0, p2 = nums.length - 1;
-while (cur <= p2) {
+while (cur <= p2) {                    // 到 p2 就停（p2 右边全是 2）
     if (nums[cur] == 0) {
         swap(nums, p0, cur);
+        p0++;
+        cur++;                         // 换来的必是 1 或 0，可前进
     } else if (nums[cur] == 2) {
         swap(nums, p2, cur);
+        p2--;                          // ⭐ cur 不动！换来的未看过，重查
     } else {
-        cur++;
+        cur++;                         // 是 1，直接走
     }
 }
 ```
