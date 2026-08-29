@@ -93,8 +93,20 @@ public class Main {
         return 0;
     }
 }
+
+```
+**② 不给长度，直接一行数字**
+
+```
+1 2 3 4 5
 ```
 
+```java
+String line = sc.nextLine();
+String[] parts = line.split(" ");
+int[] arr = new int[parts.length];
+for (int i = 0; i < parts.length; i++) arr[i] = Integer.parseInt(parts[i]);
+```
 ### 🧩 自定义类（一片空白模式必须会）
 
 ```java
